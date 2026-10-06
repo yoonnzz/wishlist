@@ -8,6 +8,7 @@ import { loadStudio, type Post, type Product, type StudioData } from "../lib/stu
 
 type ArticleItem = { heading: string; price?: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
+const blogDivider = "────────────────";
 
 function isShopProductUrl(value: string) {
   try {
@@ -51,6 +52,7 @@ function readArticleSections(post: Post, products: Product[]): ArticleSections {
 function formatForBlog(post: Post, sections: ArticleSections) {
   if (!sections.items.length) return `${post.title}\n\n${post.body}`;
   return [post.title, sections.intro, ...sections.items.map((item) => [
+    blogDivider,
     item.heading,
     item.price || "",
     "[사진 1 삽입]\n[사진 2 삽입]",
@@ -74,6 +76,7 @@ function formatForBlogHtml(post: Post, sections: ArticleSections) {
     `<p><strong>${escapeHtml(post.title)}</strong></p>`,
     sections.intro && `<p>${htmlLines(sections.intro)}</p>`,
     ...sections.items.flatMap((item) => [
+      `<p style="text-align:center;color:#aeb9a2">${blogDivider}</p>`,
       `<p><strong>${htmlLines(item.heading)}</strong></p>`,
       item.price && `<p>${htmlLines(item.price)}</p>`,
       "<p>[사진 1 삽입]<br>[사진 2 삽입]</p>",
@@ -139,7 +142,7 @@ export function PostDetail({ postId }: { postId: string }) {
       <h1>{post.title}</h1>
       <div className="post-detail-actions">
         <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "서식 포함 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "글 양식 복사하기"}</button>
-        {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
+        {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-v2.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
       </div>
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 굵은 글씨가 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
       {hasPhotoArchive && <p className="post-detail-hint">글 양식을 복사한 뒤 각 사진의 ‘사진 복사’로 한 장씩 붙여넣거나, 사진 10장을 내려받아 표시된 위치에 넣어주세요.</p>}

@@ -61,7 +61,7 @@ const photosByProduct: Record<string, Omit<PhotoSet, "source">> = {
     brand: "THE KNIT COMPANY", product: "캐시미어 니트",
     photos: [
       { file: "cashmere-oatmeal-mood.jpg", label: "착용 분위기 · 오트밀", detail: "브랜드 모델의 오트밀 착용 컷과 자연스러운 소재감" },
-      { file: "cashmere-oatmeal-fit.jpg", label: "앞면 핏 · 오트밀", detail: "브랜드 모델 착용 컷에서 보이는 목선과 몸판의 핏" },
+      { file: "cashmere-oatmeal-front.jpg", label: "앞면 핏 · 오트밀", detail: "브랜드 모델 착용 컷에서 보이는 목선과 몸판의 핏" },
     ],
   },
   "3085362": {
@@ -111,7 +111,7 @@ export function PostPhotoGallery({ post, products }: { post: Post; products: Pro
 
   return <details className="post-photo-gallery" open>
     <summary>사진 포함 초안 · {sets.length}개 상품, {sets.length * 2}장</summary>
-    <div className="post-photo-intro">사진을 눌러 한 장씩 저장하거나, <a href={`${imageRoot}/29cm-wishlist-photos.zip`} download="29cm-wishlist-photos.zip">사진 10장과 출처 한 번에 받기 ↓</a></div>
+    <div className="post-photo-intro">사진을 눌러 한 장씩 저장하거나, <a href={`${imageRoot}/29cm-wishlist-photos-v2.zip`} download="29cm-wishlist-photos.zip">사진 10장과 출처 한 번에 받기 ↓</a></div>
     {sets.map((set) => <PhotoSetView set={set} key={set.source}/>) }
   </details>;
 }
