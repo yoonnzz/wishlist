@@ -8,7 +8,23 @@ import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-l
 type Photo = { file: string; label: string; detail: string };
 export type PhotoSet = { source: string; brand: string; product: string; photos: [Photo, Photo] };
 
-const imageRoot = "/draft-images/2026-10-06-29cm";
+export const imageRoot = "/draft-images/2026-10-06-29cm";
+
+export async function embeddedPhoto(file: string) {
+  const response = await fetch(`${imageRoot}/${file}`);
+  if (!response.ok) throw new Error(`사진을 불러오지 못했습니다: ${file}`);
+  const bitmap = await createImageBitmap(await response.blob());
+  try {
+    const canvas = document.createElement("canvas");
+    const scale = Math.min(1, 1200 / bitmap.width);
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("사진을 변환하지 못했습니다.");
+    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    return canvas.toDataURL("image/jpeg", 0.88);
+  } finally { bitmap.close(); }
+}
 
 function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) {
   const [state, setState] = useState<"idle" | "copying" | "copied" | "error">("idle");
@@ -32,14 +48,15 @@ function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) 
       })();
       await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
       setState("copied");
-    } catch {
+    } catch (error) {
+      console.error("사진 복사 실패", error);
       setState("error");
     }
   }
 
   return <button type="button" className="post-photo-copy-button" onClick={copyPhoto} disabled={state === "copying"} aria-label={`${product} ${photo.label} 사진 복사`}>
     {state === "copied" ? <Check size={14}/> : <Copy size={14}/>}
-    {state === "copying" ? "복사 중…" : state === "copied" ? "복사됨" : state === "error" ? "복사 실패 · 사진 저장" : "사진 복사"}
+    {state === "copying" ? "복사 중…" : state === "copied" ? "사진 복사됨" : state === "error" ? "복사 실패 · 저장해서 첨부" : "사진 복사"}
   </button>;
 }
 
@@ -108,7 +125,10 @@ export function PhotoSetView({ set, showHeading = true, showSource = true }: { s
       <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
         <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
       </a>
-      <CopyPhotoButton photo={photo} product={`${set.brand} ${set.product}`}/>
+      <div className="post-photo-actions">
+        <CopyPhotoButton photo={photo} product={`${set.brand} ${set.product}`}/>
+        <a href={`${imageRoot}/${photo.file}`} download={photo.file}>사진 저장</a>
+      </div>
     </figure>)}</div>
     {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
   </section>;
