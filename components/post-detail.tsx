@@ -6,7 +6,7 @@ import { StudioShell } from "./studio-shell";
 import { getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
 import { loadStudio, type Post, type Product, type StudioData } from "../lib/studio-types";
 
-type ArticleItem = { heading: string; comment: string; url: string; source?: string; photos?: PhotoSet };
+type ArticleItem = { heading: string; price?: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
 
 function isShopProductUrl(value: string) {
@@ -35,13 +35,15 @@ function readArticleSections(post: Post, products: Product[]): ArticleSections {
   let intro = "";
   let position = 0;
   const items = matches.map((match, index) => {
-    const paragraphs = body.slice(position, match.index).trim().split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
+    const chunk = body.slice(position, match.index);
+    const price = chunk.match(/^가격:\s*(.+)$/m)?.[1];
+    const paragraphs = chunk.replace(/^가격:[^\n]*(?:\n|$)/gm, "").trim().split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
     position = (match.index ?? 0) + match[0].length;
     if (index === 0) {
       intro = paragraphs.slice(0, -2).join("\n\n");
-      return { heading: paragraphs.at(-2) ?? "", comment: paragraphs.at(-1) ?? "", url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
+      return { heading: paragraphs.at(-2) ?? "", price, comment: paragraphs.at(-1) ?? "", url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
     }
-    return { heading: paragraphs[0] ?? "", comment: paragraphs.slice(1).join("\n\n"), url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
+    return { heading: paragraphs[0] ?? "", price, comment: paragraphs.slice(1).join("\n\n"), url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
   });
   return { intro, items, ending: body.slice(position).trim() };
 }
@@ -50,6 +52,7 @@ function formatForBlog(post: Post, sections: ArticleSections) {
   if (!sections.items.length) return `${post.title}\n\n${post.body}`;
   return [post.title, sections.intro, ...sections.items.map((item) => [
     item.heading,
+    item.price ? `가격: ${item.price}` : "",
     "[사진 1 삽입]\n[사진 2 삽입]",
     item.comment,
     item.url,
@@ -63,6 +66,7 @@ function ArticleBody({ sections, store }: { sections: ArticleSections; store: Po
     {sections.items.map((item, index) => <section className="post-article-product" key={`${item.url}-${index}`}>
       <div className="post-article-divider" aria-hidden="true"/>
       <h2>{item.heading}</h2>
+      {item.price && <p className="post-article-price">{item.price}</p>}
       {item.photos && <PhotoSetView set={item.photos} showHeading={false} showSource={false}/>} 
       <div className="post-article-comment">{item.comment}</div>
       <a className="post-article-product-link" href={item.url} target="_blank" rel="noopener noreferrer">{store} 상품 보러가기 <ArrowUpRight size={15}/></a>

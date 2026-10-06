@@ -2,7 +2,7 @@ import type { Product, Store } from "./studio-types";
 
 export const WISHLIST_TEMPLATE_STEPS = [
   "짧은 인사와 이번 위시리스트의 주제",
-  "상품마다 브랜드·상품명 → 사진 2장 → 짧은 감상 → 상품 링크·사진 출처",
+  "상품마다 브랜드·상품명 → 확인한 가격 → 사진 2장 → 짧은 감상 → 상품 링크·사진 출처",
   "가벼운 맺음말과 관련 태그",
 ] as const;
 
@@ -16,6 +16,8 @@ export function makeWishlistDraft(store: Store, products: Product[]) {
       ...products.flatMap((item) => [
         item.brand,
         `${item.name}${item.color ? ` (${item.color})` : ""}`,
+        "",
+        "가격: [정상가와 현재 판매가 확인 후 입력]",
         "",
         item.note || "[색·핏·디테일 중 마음에 든 이유와 입고 싶은 장면을 자연스럽게 적어주세요]",
         item.url,
