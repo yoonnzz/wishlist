@@ -10,6 +10,7 @@ import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-l
 type ArticleItem = { heading: string; price?: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
 const blogDivider = "────────────────";
+const blogFontStyle = "font-family:'NanumSquare','나눔스퀘어',sans-serif;font-size:11pt";
 
 function isShopProductUrl(value: string) {
   try {
@@ -73,22 +74,23 @@ function htmlLines(value: string) {
 }
 
 function formatForBlogHtml(post: Post, sections: ArticleSections) {
-  if (!sections.items.length) return `<div><p><strong>${escapeHtml(post.title)}</strong></p><p>${htmlLines(post.body)}</p></div>`;
+  const paragraph = (content: string, extraStyle = "") => `<p style="${blogFontStyle}${extraStyle}">${content}</p>`;
+  if (!sections.items.length) return `<div style="${blogFontStyle}">${paragraph(`<strong>${escapeHtml(post.title)}</strong>`)}${paragraph(htmlLines(post.body))}</div>`;
   const blocks = [
-    `<p><strong>${escapeHtml(post.title)}</strong></p>`,
-    sections.intro && `<p>${htmlLines(sections.intro)}</p>`,
+    paragraph(`<strong>${escapeHtml(post.title)}</strong>`),
+    sections.intro && paragraph(htmlLines(sections.intro)),
     ...sections.items.flatMap((item) => [
-      `<p style="text-align:center;color:#aeb9a2">${blogDivider}</p>`,
-      `<p><strong>${htmlLines(item.heading)}</strong></p>`,
-      item.price && `<p>${htmlLines(item.price)}</p>`,
-      "<p>[사진 1 삽입]<br>[사진 2 삽입]</p>",
-      item.comment && `<p>${htmlLines(item.comment)}</p>`,
-      `<p><a href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a></p>`,
-      `<p>사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}</p>`,
+      paragraph(blogDivider, ";text-align:center;color:#aeb9a2"),
+      paragraph(`<strong>${htmlLines(item.heading)}</strong>`),
+      item.price && paragraph(htmlLines(item.price)),
+      paragraph("[사진 1 삽입]<br>[사진 2 삽입]"),
+      item.comment && paragraph(htmlLines(item.comment)),
+      paragraph(`<a style="${blogFontStyle}" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
+      paragraph(`사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
     ]),
-    sections.ending && `<p>${htmlLines(sections.ending)}</p>`,
+    sections.ending && paragraph(htmlLines(sections.ending)),
   ];
-  return `<div>${blocks.filter(Boolean).join("")}</div>`;
+  return `<div style="${blogFontStyle}">${blocks.filter(Boolean).join("")}</div>`;
 }
 
 function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
@@ -143,7 +145,7 @@ export function PostDetail({ postId }: { postId: string }) {
       <div className="post-detail-meta"><span>{post.store} 위시리스트</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0, 10)}</time></div>
       <h1>{post.title}</h1>
       <div className="post-detail-actions">
-        <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "서식 포함 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "글 양식 복사하기"}</button>
+        <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "나눔스퀘어 11pt 서식 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "글 양식 복사하기"}</button>
         {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-v2.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
       </div>
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 굵은 글씨가 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
