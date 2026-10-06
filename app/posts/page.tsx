@@ -14,7 +14,7 @@ export default function PostsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const [section, setSection] = useState<"write" | "products" | "archive">("write");
+  const [section, setSection] = useState<"write" | "products" | "archive">("archive");
   const [productForm, setProductForm] = useState(emptyProduct);
   const [store, setStore] = useState<Store>("29CM");
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -119,11 +119,11 @@ export default function PostsPage() {
 
   return <StudioShell active="posts">
     <div className="eyebrow">WRITE / WISHLIST SERIES</div>
-    <div className="page-head"><div><h1>블로그 초안</h1><p>29CM와 무신사의 아이템을 모아 나만의 위시리스트를 준비해요.</p></div><div className="schedule-pill">월 · 수 · 금 <strong>08:00</strong></div></div>
+    <div className="page-head"><div><h1>블로그 초안</h1><p>제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요.</p></div><div className="schedule-pill">작성 목표 · 월 · 수 · 금 <strong>08:00</strong></div></div>
     <div className="tab-row" role="tablist" aria-label="블로그 작업">
-      <button className={section === "write" ? "selected" : ""} onClick={() => setSection("write")}>글 쓰기</button>
-      <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>상품 보관함 <span>{data?.products.length ?? 0}</span></button>
-      <button className={section === "archive" ? "selected" : ""} onClick={() => setSection("archive")}>초안 보관함 <span>{data?.posts.length ?? 0}</span></button>
+      <button className={section === "archive" ? "selected" : ""} onClick={() => setSection("archive")}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
+      <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>취향 알려주기</button>
+      <button className={section === "write" ? "selected" : ""} onClick={() => setSection("write")}>직접 작성</button>
     </div>
     {error && <div className="flash error" role="alert">{error}</div>}
     {notice && <div className="flash success" role="status">{notice}</div>}
@@ -136,13 +136,13 @@ export default function PostsPage() {
           {(["29CM", "무신사"] as Store[]).map((item) => <button key={item} disabled={Boolean(editingId)} className={store === item ? "active" : ""} onClick={() => { setStore(item); setSelectedIds([]); }}>{item}</button>)}
         </div>
         {editingId && <p className="hint">저장된 초안을 수정하고 있어요. 상품 구성은 그대로 유지됩니다.</p>}
-        {!editingId && <p className="hint">이번 시리즈에 넣을 상품을 골라주세요. 이미 글에 사용한 모델은 자동으로 제외돼요.</p>}
+        {!editingId && <p className="hint">직접 글을 쓰고 싶을 때만 사용하세요. 제가 작성하는 글의 상품은 따로 조사해 고릅니다.</p>}
         <div className="candidate-list">
           {candidates.length ? candidates.map((product) => <label className="candidate" key={product.id}>
             <input type="checkbox" disabled={Boolean(editingId)} checked={selectedIds.includes(product.id)} onChange={() => setSelectedIds((ids) => ids.includes(product.id) ? ids.filter((id) => id !== product.id) : [...ids, product.id])}/>
             <span><strong>{product.brand}</strong><small>{product.name}{product.color ? ` · ${product.color}` : ""}</small></span>
             <a href={product.url} target="_blank" rel="noopener noreferrer" aria-label={`${product.name} 상품 링크`} onClick={(event) => event.stopPropagation()}><ArrowUpRight size={16}/></a>
-          </label>) : <div className="empty-inline">아직 사용할 수 있는 {store} 상품이 없어요.<button onClick={() => setSection("products")}>상품 추가하기 <ArrowUpRight size={14}/></button></div>}
+          </label>) : <div className="empty-inline">직접 작성에 사용할 {store} 상품이 없어요. 이 화면은 선택 사항입니다.<button onClick={() => setSection("products")}>참고 상품 남기기 <ArrowUpRight size={14}/></button></div>}
         </div>
       </section>
       <section className="panel writing-panel">
@@ -159,7 +159,8 @@ export default function PostsPage() {
     </div>}
 
     {data && section === "products" && <div className="work-grid">
-      <section className="panel"><div className="panel-heading"><div><span className="eyebrow">MY TASTE</span><h2>상품 추가</h2></div><Plus size={22}/></div>
+      <section className="panel"><div className="panel-heading"><div><span className="eyebrow">MY TASTE</span><h2>좋아하는 상품 예시</h2></div><Plus size={22}/></div>
+        <p className="hint">취향을 알려주고 싶을 때만 남겨주세요. 매번 상품을 추가할 필요는 없어요.</p>
         <form onSubmit={addProduct} className="stacked-form">
           <label className="field-label">쇼핑몰<select className="text-field" value={productForm.store} onChange={(event) => setProductForm({ ...productForm, store: event.target.value as Store })}><option>29CM</option><option>무신사</option></select></label>
           <div className="two-fields"><label className="field-label">브랜드<input className="text-field" value={productForm.brand} onChange={(event) => setProductForm({ ...productForm, brand: event.target.value })} required/></label><label className="field-label">모델명 / 품번<input className="text-field" value={productForm.model} onChange={(event) => setProductForm({ ...productForm, model: event.target.value })} required/></label></div>
@@ -171,8 +172,8 @@ export default function PostsPage() {
           <button className="primary-button" disabled={busy}><Plus size={16}/> 상품 저장</button>
         </form>
       </section>
-      <section className="panel"><div className="panel-heading"><div><span className="eyebrow">SAVED PIECES</span><h2>저장된 상품</h2></div><span className="count-chip">{data.products.length}개</span></div>
-        {data.products.length ? <div className="saved-list">{data.products.map((product) => <div className="saved-item" key={product.id}><div><span className="mini-store">{product.store}</span> <strong>{product.brand}</strong><p>{product.name}{product.color ? ` · ${product.color}` : ""}</p><small>{product.usedInPostId ? "이미 글에 사용함" : "다음 글에 사용 가능"}</small></div><a href={product.url} target="_blank" rel="noopener noreferrer" aria-label="상품 페이지 열기"><ArrowUpRight size={17}/></a></div>)}</div> : <div className="empty-inline">왼쪽에서 첫 번째 상품을 저장해 주세요.</div>}
+      <section className="panel"><div className="panel-heading"><div><span className="eyebrow">SAVED PIECES</span><h2>참고 상품</h2></div><span className="count-chip">{data.products.length}개</span></div>
+        {data.products.length ? <div className="saved-list">{data.products.map((product) => <div className="saved-item" key={product.id}><div><span className="mini-store">{product.store}</span> <strong>{product.brand}</strong><p>{product.name}{product.color ? ` · ${product.color}` : ""}</p><small>{product.usedInPostId ? "이미 글에 사용함" : "취향 참고용"}</small></div><a href={product.url} target="_blank" rel="noopener noreferrer" aria-label="상품 페이지 열기"><ArrowUpRight size={17}/></a></div>)}</div> : <div className="empty-inline">좋아하는 상품 예시가 있다면 남겨주세요. 없어도 됩니다.</div>}
       </section>
       <section className="panel full"><div className="panel-heading"><div><span className="eyebrow">VOICE GUIDE</span><h2>말투와 취향 기준</h2></div></div>
         <p className="hint">보내주신 블로그 글 3편을 바탕으로 초안에 참고할 기준입니다. 원하는 표현과 피하고 싶은 표현을 덧붙여 주세요.</p>
@@ -184,7 +185,7 @@ export default function PostsPage() {
 
     {data && section === "archive" && <section className="panel archive-panel">
       <div className="panel-heading"><div><span className="eyebrow">DRAFT LIBRARY</span><h2>초안 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>
-      {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3>{post.title}</h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><button onClick={() => editPost(post)}>수정하기</button><button onClick={async () => { await navigator.clipboard.writeText(`${post.title}\n\n${post.body}`); setNotice("제목과 본문을 복사했어요."); }}><Clipboard size={15}/> 복사하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">저장된 초안이 없어요. 글 쓰기에서 첫 초안을 만들어보세요.</div>}
+      {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3>{post.title}</h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><button onClick={() => editPost(post)}>수정하기</button><button onClick={async () => { await navigator.clipboard.writeText(`${post.title}\n\n${post.body}`); setNotice("제목과 본문을 복사했어요."); }}><Clipboard size={15}/> 복사하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
     </section>}
   </StudioShell>;
 }

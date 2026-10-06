@@ -7,8 +7,26 @@ const tools = [
     inputSchema: { type: "object", properties: {}, additionalProperties: false },
   },
   {
+    name: "save_wishlist_product",
+    description: "Save one independently researched 29CM or Musinsa product before drafting. Check the live product page and brand/model identity first; prior models are rejected across stores unless the owner explicitly allowed reuse.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        store: { type: "string", enum: ["29CM", "무신사"] },
+        brand: { type: "string" },
+        name: { type: "string" },
+        model: { type: "string" },
+        color: { type: "string" },
+        url: { type: "string" },
+        note: { type: "string" },
+      },
+      required: ["store", "brand", "name", "model", "url"],
+      additionalProperties: false,
+    },
+  },
+  {
     name: "save_wishlist_draft",
-    description: "Save one researched wishlist draft for the selected store, using only product IDs returned by read_wishlist_workspace. Duplicate models are rejected.",
+    description: "Save one researched wishlist draft for the selected store, using product IDs returned by read_wishlist_workspace or save_wishlist_product. Duplicate models are rejected.",
     inputSchema: {
       type: "object",
       properties: {
@@ -54,6 +72,7 @@ export async function POST(request: Request) {
   const args = input.params?.arguments ?? {};
   let response: Response;
   if (name === "read_wishlist_workspace") response = await getStudio();
+  else if (name === "save_wishlist_product") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "product.add", ...args, allowReuse: false }) }));
   else if (name === "save_wishlist_draft") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "post.create", ...args }) }));
   else if (name === "save_trend_letter") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "letter.add", ...args }) }));
   else return Response.json({ jsonrpc: "2.0", id: input.id ?? null, error: { code: -32602, message: "Unknown tool" } }, { status: 400 });
