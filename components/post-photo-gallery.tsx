@@ -22,8 +22,8 @@ const photosByProduct: Record<string, PhotoSet> = {
   "4121482": {
     brand: "THE KNIT COMPANY", product: "캐시미어 니트",
     photos: [
-      { file: "cashmere-mocha.webp", label: "착용 분위기 · 모카 예시", detail: "부드러운 소재감과 차분한 톤" },
-      { file: "cashmere-oatmeal.webp", label: "핏 · 오트밀 예시", detail: "목선과 몸에 떨어지는 핏" },
+      { file: "cashmere-oatmeal-mood.jpg", label: "착용 분위기 · 오트밀", detail: "브랜드 모델의 오트밀 착용 컷과 자연스러운 소재감" },
+      { file: "cashmere-oatmeal-fit.jpg", label: "앞면 핏 · 오트밀", detail: "브랜드 모델 착용 컷에서 보이는 목선과 몸판의 핏" },
     ],
   },
   "3085362": {
