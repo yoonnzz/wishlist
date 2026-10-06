@@ -94,7 +94,7 @@ export function PostDetail({ postId }: { postId: string }) {
         <button className="secondary-button" onClick={async () => { await navigator.clipboard.writeText(formatForBlog(post, sections!)); setCopied(true); }}><Clipboard size={16}/>{copied ? "글 양식 복사됨" : "글 양식 복사하기"}</button>
         {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
       </div>
-      {hasPhotoArchive && <p className="post-detail-hint">글 양식을 복사한 뒤, 내려받은 사진을 표시된 위치에 넣어주세요.</p>}
+      {hasPhotoArchive && <p className="post-detail-hint">글 양식을 복사한 뒤 각 사진의 ‘사진 복사’로 한 장씩 붙여넣거나, 사진 10장을 내려받아 표시된 위치에 넣어주세요.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
     </article>}

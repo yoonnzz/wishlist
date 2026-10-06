@@ -1,9 +1,47 @@
+"use client";
+
+import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import type { Post, Product } from "../lib/studio-types";
 
 type Photo = { file: string; label: string; detail: string };
 export type PhotoSet = { source: string; brand: string; product: string; photos: [Photo, Photo] };
 
 const imageRoot = "/draft-images/2026-10-06-29cm";
+
+function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) {
+  const [state, setState] = useState<"idle" | "copying" | "copied" | "error">("idle");
+
+  async function copyPhoto() {
+    setState("copying");
+    try {
+      if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") throw new Error("Clipboard unavailable");
+      const png = (async () => {
+        const response = await fetch(`${imageRoot}/${photo.file}`);
+        if (!response.ok) throw new Error("Photo unavailable");
+        const bitmap = await createImageBitmap(await response.blob());
+        const canvas = document.createElement("canvas");
+        canvas.width = bitmap.width;
+        canvas.height = bitmap.height;
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Image conversion unavailable");
+        context.drawImage(bitmap, 0, 0);
+        bitmap.close();
+        return new Promise<Blob>((resolve, reject) => canvas.toBlob((blob) => blob ? resolve(blob) : reject(new Error("Image conversion failed")), "image/png"));
+      })();
+      await navigator.clipboard.write([new ClipboardItem({ "image/png": png })]);
+      setState("copied");
+    } catch {
+      setState("error");
+    }
+  }
+
+  return <button type="button" className="post-photo-copy-button" onClick={copyPhoto} disabled={state === "copying"} aria-label={`${product} ${photo.label} 사진 복사`}>
+    {state === "copied" ? <Check size={14}/> : <Copy size={14}/>}
+    {state === "copying" ? "복사 중…" : state === "copied" ? "복사됨" : state === "error" ? "복사 실패 · 사진 저장" : "사진 복사"}
+  </button>;
+}
+
 const photosByProduct: Record<string, Omit<PhotoSet, "source">> = {
   "3453926": {
     brand: "EAAH", product: "데님",
@@ -61,6 +99,7 @@ export function PhotoSetView({ set, showHeading = true, showSource = true }: { s
       <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
         <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
       </a>
+      <CopyPhotoButton photo={photo} product={`${set.brand} ${set.product}`}/>
     </figure>)}</div>
     {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
   </section>;
