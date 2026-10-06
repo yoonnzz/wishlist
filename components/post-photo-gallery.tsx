@@ -51,7 +51,7 @@ export function PostPhotoGallery({ post, products }: { post: Post; products: Pro
     const match = product.url.match(/29cm\.co\.kr\/products\/(\d+)/);
     const set = match && photosByProduct[match[1]];
     return set ? [{ source: `https://www.29cm.co.kr/products/${match[1]}`, ...set }] : [];
-  });
+  }).sort((left, right) => post.body.indexOf(left.source) - post.body.indexOf(right.source));
   if (!sets.length) return null;
 
   return <details className="post-photo-gallery" open>
