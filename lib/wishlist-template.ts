@@ -17,7 +17,7 @@ export function makeWishlistDraft(store: Store, products: Product[]) {
         item.brand,
         `${item.name}${item.color ? ` (${item.color})` : ""}`,
         "",
-        "가격: [정상가와 현재 판매가 확인 후 입력]",
+        "가격: 정상가 [확인 후 입력]",
         "",
         item.note || "[색·핏·디테일 중 마음에 든 이유와 입고 싶은 장면을 자연스럽게 적어주세요]",
         item.url,

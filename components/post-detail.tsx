@@ -36,7 +36,7 @@ function readArticleSections(post: Post, products: Product[]): ArticleSections {
   let position = 0;
   const items = matches.map((match, index) => {
     const chunk = body.slice(position, match.index);
-    const price = chunk.match(/^가격:\s*(.+)$/m)?.[1];
+    const price = [...chunk.matchAll(/^가격:\s*(.+)$/gm)].map((match) => match[1]).join("\n") || undefined;
     const paragraphs = chunk.replace(/^가격:[^\n]*(?:\n|$)/gm, "").trim().split(/\n\s*\n/).map((part) => part.trim()).filter(Boolean);
     position = (match.index ?? 0) + match[0].length;
     if (index === 0) {
@@ -52,7 +52,7 @@ function formatForBlog(post: Post, sections: ArticleSections) {
   if (!sections.items.length) return `${post.title}\n\n${post.body}`;
   return [post.title, sections.intro, ...sections.items.map((item) => [
     item.heading,
-    item.price ? `가격: ${item.price}` : "",
+    item.price || "",
     "[사진 1 삽입]\n[사진 2 삽입]",
     item.comment,
     item.url,
