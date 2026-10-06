@@ -1,0 +1,1 @@
+ALTER TABLE `products` ADD `reuse_allowed` integer DEFAULT false NOT NULL;
