@@ -6,13 +6,30 @@ import { StudioShell } from "./studio-shell";
 import { getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
 import { loadStudio, type Post, type Product, type StudioData } from "../lib/studio-types";
 
-type ArticleItem = { heading: string; comment: string; url: string; photos?: PhotoSet };
+type ArticleItem = { heading: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
+
+function isShopProductUrl(value: string) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "https:") return false;
+    const is29cm = url.hostname === "29cm.co.kr" || url.hostname.endsWith(".29cm.co.kr");
+    const isMusinsa = url.hostname === "musinsa.com" || url.hostname.endsWith(".musinsa.com");
+    return (is29cm && url.pathname.startsWith("/products/")) || isMusinsa;
+  } catch { return false; }
+}
 
 function readArticleSections(post: Post, products: Product[]): ArticleSections {
   const bySource = new Map(getPostPhotoSets(post, products).map((set) => [set.source, set]));
-  const body = post.body.replace(/^사진 2장 출처:[^\n]*(?:\n|$)/gm, "");
-  const matches = [...body.matchAll(/https:\/\/www\.29cm\.co\.kr\/products\/\d+/g)];
+  const sources = new Map<string, string>();
+  let currentUrl = "";
+  for (const line of post.body.split("\n")) {
+    const value = line.trim();
+    if (isShopProductUrl(value)) currentUrl = value;
+    else if (currentUrl && /^사진 (?:2장 )?출처:/.test(value)) sources.set(currentUrl, value.replace(/^사진 (?:2장 )?출처:\s*/, ""));
+  }
+  const body = post.body.replace(/^사진 (?:2장 )?출처:[^\n]*(?:\n|$)/gm, "");
+  const matches = [...body.matchAll(/^https:\/\/[^\s]+$/gm)].filter((match) => isShopProductUrl(match[0]));
   if (!matches.length) return { intro: body.trim(), items: [], ending: "" };
 
   let intro = "";
@@ -22,9 +39,9 @@ function readArticleSections(post: Post, products: Product[]): ArticleSections {
     position = (match.index ?? 0) + match[0].length;
     if (index === 0) {
       intro = paragraphs.slice(0, -2).join("\n\n");
-      return { heading: paragraphs.at(-2) ?? "", comment: paragraphs.at(-1) ?? "", url: match[0], photos: bySource.get(match[0]) };
+      return { heading: paragraphs.at(-2) ?? "", comment: paragraphs.at(-1) ?? "", url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
     }
-    return { heading: paragraphs[0] ?? "", comment: paragraphs.slice(1).join("\n\n"), url: match[0], photos: bySource.get(match[0]) };
+    return { heading: paragraphs[0] ?? "", comment: paragraphs.slice(1).join("\n\n"), url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
   });
   return { intro, items, ending: body.slice(position).trim() };
 }
@@ -33,14 +50,14 @@ function formatForBlog(post: Post, sections: ArticleSections) {
   if (!sections.items.length) return `${post.title}\n\n${post.body}`;
   return [post.title, sections.intro, ...sections.items.map((item) => [
     item.heading,
-    item.photos ? "[사진 1 삽입]\n[사진 2 삽입]" : "",
+    "[사진 1 삽입]\n[사진 2 삽입]",
     item.comment,
     item.url,
-    item.photos ? `사진 출처: 29CM ${item.photos.brand} 상품 페이지` : "",
+    `사진 출처: ${item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]")}`,
   ].filter(Boolean).join("\n\n")), sections.ending].filter(Boolean).join("\n\n");
 }
 
-function ArticleBody({ sections }: { sections: ArticleSections }) {
+function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
   return <div className="post-article-body">
     {sections.intro && <div className="post-article-intro">{sections.intro}</div>}
     {sections.items.map((item, index) => <section className="post-article-product" key={`${item.url}-${index}`}>
@@ -48,8 +65,8 @@ function ArticleBody({ sections }: { sections: ArticleSections }) {
       <h2>{item.heading}</h2>
       {item.photos && <PhotoSetView set={item.photos} showHeading={false} showSource={false}/>} 
       <div className="post-article-comment">{item.comment}</div>
-      <a className="post-article-product-link" href={item.url} target="_blank" rel="noopener noreferrer">29CM 상품 보러가기 <ArrowUpRight size={15}/></a>
-      {item.photos && <p className="post-article-source">사진 출처 · 29CM {item.photos.brand} 상품 페이지</p>}
+      <a className="post-article-product-link" href={item.url} target="_blank" rel="noopener noreferrer">{store} 상품 보러가기 <ArrowUpRight size={15}/></a>
+      {(item.source || item.photos) && <p className="post-article-source">사진 출처 · {item.source || `29CM ${item.photos?.brand} 상품 페이지`}</p>}
     </section>)}
     {sections.ending && <div className="post-article-ending">{sections.ending}</div>}
   </div>;
@@ -78,7 +95,7 @@ export function PostDetail({ postId }: { postId: string }) {
         {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
       </div>
       {hasPhotoArchive && <p className="post-detail-hint">글 양식을 복사한 뒤, 내려받은 사진을 표시된 위치에 넣어주세요.</p>}
-      {sections && <ArticleBody sections={sections}/>}
+      {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
     </article>}
   </StudioShell>;

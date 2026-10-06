@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ArrowUpRight, Check, PenLine, Plus, Save, ShoppingBag } from "lucide-react";
 import { StudioShell } from "../../components/studio-shell";
 import { loadStudio, studioAction, type Post, type Product, type Store, type StudioData } from "../../lib/studio-types";
+import { makeWishlistDraft, WISHLIST_TEMPLATE_STEPS } from "../../lib/wishlist-template";
 import { registerWebMcpTool } from "../../lib/register-webmcp";
 
 const emptyProduct = { store: "29CM" as Store, brand: "", name: "", model: "", color: "", url: "", note: "", allowReuse: false };
@@ -68,23 +69,10 @@ export default function PostsPage() {
 
   function fillOutline() {
     if (!selected.length) return setError("본문에 넣을 상품을 먼저 선택해 주세요.");
-    const headline = `${store}에서 찾은 요즘 위시리스트🤍`;
-    setTitle(headline);
-    setBody([
-      "안녕하세요",
-      `오늘은 ${store}에서 눈여겨보고 있는 아이템들을 모아봤어요.`,
-      "",
-      ...selected.flatMap((item) => [
-        item.brand,
-        `${item.name}${item.color ? ` (${item.color})` : ""}`,
-        "",
-        item.note || "[이 상품이 마음에 든 이유를 적어주세요]",
-        item.url,
-        "",
-      ]),
-      "이번 위시리스트에서 가장 마음에 드는 아이템은 어떤 건가요? 🤍",
-    ].join("\n"));
-    setNotice("상품 정보와 메모로 본문 틀을 채웠어요. 내용을 확인하고 다듬어 주세요.");
+    const draft = makeWishlistDraft(store, selected);
+    setTitle(draft.title);
+    setBody(draft.body);
+    setNotice("위시리스트 기본 템플릿을 채웠어요. 사진과 감상을 확인하고 다듬어 주세요.");
     setError("");
   }
 
@@ -149,12 +137,13 @@ export default function PostsPage() {
       </section>
       <section className="panel writing-panel">
         <div className="panel-heading"><div><span className="eyebrow">STEP 02</span><h2>나의 글로 완성하기</h2></div><PenLine size={22}/></div>
+        <div className="wishlist-template-note"><strong>위시리스트 기본 템플릿</strong><p>{WISHLIST_TEMPLATE_STEPS.join(" · ")}</p></div>
         <form onSubmit={savePost}>
           <label className="field-label" htmlFor="post-title">제목</label>
           <input id="post-title" className="text-field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="예: 10월에 눈여겨보는 아우터 위시리스트" required/>
           <label className="field-label" htmlFor="post-body">본문</label>
           <textarea id="post-body" className="text-area post-body" value={body} onChange={(event) => setBody(event.target.value)} placeholder="상품을 선택한 뒤 본문 틀을 만들거나, 여기서 바로 글을 써보세요." required/>
-          <div className="form-actions"><button type="button" className="secondary-button" onClick={fillOutline} disabled={busy || Boolean(editingId)}>상품 정보로 틀 채우기</button><button className="primary-button" disabled={busy || !title.trim() || !body.trim() || (!editingId && !selectedIds.length)}><Save size={16}/> 초안 저장</button></div>
+          <div className="form-actions"><button type="button" className="secondary-button" onClick={fillOutline} disabled={busy || Boolean(editingId)}>위시리스트 템플릿 적용</button><button className="primary-button" disabled={busy || !title.trim() || !body.trim() || (!editingId && !selectedIds.length)}><Save size={16}/> 초안 저장</button></div>
           <p className="hint">구매하거나 사용하지 않은 상품은 실제 후기처럼 쓰지 않도록 확인해 주세요.</p>
         </form>
       </section>
