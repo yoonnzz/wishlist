@@ -60,6 +60,32 @@ function formatForBlog(post: Post, sections: ArticleSections) {
   ].filter(Boolean).join("\n\n")), sections.ending].filter(Boolean).join("\n\n");
 }
 
+function escapeHtml(value: string) {
+  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
+function htmlLines(value: string) {
+  return escapeHtml(value).replace(/\n/g, "<br>");
+}
+
+function formatForBlogHtml(post: Post, sections: ArticleSections) {
+  if (!sections.items.length) return `<div><p><strong>${escapeHtml(post.title)}</strong></p><p>${htmlLines(post.body)}</p></div>`;
+  const blocks = [
+    `<p><strong>${escapeHtml(post.title)}</strong></p>`,
+    sections.intro && `<p>${htmlLines(sections.intro)}</p>`,
+    ...sections.items.flatMap((item) => [
+      `<p><strong>${htmlLines(item.heading)}</strong></p>`,
+      item.price && `<p>${htmlLines(item.price)}</p>`,
+      "<p>[사진 1 삽입]<br>[사진 2 삽입]</p>",
+      item.comment && `<p>${htmlLines(item.comment)}</p>`,
+      `<p><a href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a></p>`,
+      `<p>사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}</p>`,
+    ]),
+    sections.ending && `<p>${htmlLines(sections.ending)}</p>`,
+  ];
+  return `<div>${blocks.filter(Boolean).join("")}</div>`;
+}
+
 function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
   return <div className="post-article-body">
     {sections.intro && <div className="post-article-intro">{sections.intro}</div>}
@@ -79,12 +105,29 @@ function ArticleBody({ sections, store }: { sections: ArticleSections; store: Po
 export function PostDetail({ postId }: { postId: string }) {
   const [data, setData] = useState<StudioData | null>(null);
   const [error, setError] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copyStatus, setCopyStatus] = useState<"idle" | "rich" | "plain">("idle");
 
   useEffect(() => { loadStudio().then(setData).catch((cause) => setError((cause as Error).message)); }, []);
   const post = useMemo(() => data?.posts.find((item) => item.id === postId), [data, postId]);
   const sections = useMemo(() => post && data ? readArticleSections(post, data.products) : null, [post, data]);
   const hasPhotoArchive = post?.body.includes("https://www.29cm.co.kr/products/4121482") && getPostPhotoSets(post, data?.products ?? []).length === 5;
+
+  async function copyArticle() {
+    if (!post || !sections) return;
+    const plain = formatForBlog(post, sections);
+    try {
+      if (typeof ClipboardItem === "undefined" || !navigator.clipboard.write) throw new Error("서식 복사를 지원하지 않습니다.");
+      const html = formatForBlogHtml(post, sections);
+      await navigator.clipboard.write([new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([plain], { type: "text/plain" }),
+      })]);
+      setCopyStatus("rich");
+    } catch {
+      await navigator.clipboard.writeText(plain);
+      setCopyStatus("plain");
+    }
+  }
 
   return <StudioShell active="posts">
     <div className="post-detail-top"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
@@ -95,9 +138,10 @@ export function PostDetail({ postId }: { postId: string }) {
       <div className="post-detail-meta"><span>{post.store} 위시리스트</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0, 10)}</time></div>
       <h1>{post.title}</h1>
       <div className="post-detail-actions">
-        <button className="secondary-button" onClick={async () => { await navigator.clipboard.writeText(formatForBlog(post, sections!)); setCopied(true); }}><Clipboard size={16}/>{copied ? "글 양식 복사됨" : "글 양식 복사하기"}</button>
+        <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "서식 포함 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "글 양식 복사하기"}</button>
         {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
       </div>
+      {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 굵은 글씨가 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
       {hasPhotoArchive && <p className="post-detail-hint">글 양식을 복사한 뒤 각 사진의 ‘사진 복사’로 한 장씩 붙여넣거나, 사진 10장을 내려받아 표시된 위치에 넣어주세요.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
