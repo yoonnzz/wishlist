@@ -5,6 +5,7 @@ import { ArrowLeft, ArrowUpRight, Clipboard, Download } from "lucide-react";
 import { StudioShell } from "./studio-shell";
 import { getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
 import { loadStudio, type Post, type Product, type StudioData } from "../lib/studio-types";
+import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-links";
 
 type ArticleItem = { heading: string; price?: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
@@ -15,8 +16,9 @@ function isShopProductUrl(value: string) {
     const url = new URL(value);
     if (url.protocol !== "https:") return false;
     const is29cm = url.hostname === "29cm.co.kr" || url.hostname.endsWith(".29cm.co.kr");
+    const is29cmShare = url.hostname === "29cm.onelink.me";
     const isMusinsa = url.hostname === "musinsa.com" || url.hostname.endsWith(".musinsa.com");
-    return (is29cm && url.pathname.startsWith("/products/")) || isMusinsa;
+    return (is29cm && url.pathname.startsWith("/products/")) || is29cmShare || isMusinsa;
   } catch { return false; }
 }
 
@@ -42,9 +44,9 @@ function readArticleSections(post: Post, products: Product[]): ArticleSections {
     position = (match.index ?? 0) + match[0].length;
     if (index === 0) {
       intro = paragraphs.slice(0, -2).join("\n\n");
-      return { heading: paragraphs.at(-2) ?? "", price, comment: paragraphs.at(-1) ?? "", url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
+      return { heading: paragraphs.at(-2) ?? "", price, comment: paragraphs.at(-1) ?? "", url: originalProductUrl(match[0]), source: sources.get(match[0]), photos: bySource.get(canonicalProductUrl(match[0])) };
     }
-    return { heading: paragraphs[0] ?? "", price, comment: paragraphs.slice(1).join("\n\n"), url: match[0], source: sources.get(match[0]), photos: bySource.get(match[0]) };
+    return { heading: paragraphs[0] ?? "", price, comment: paragraphs.slice(1).join("\n\n"), url: originalProductUrl(match[0]), source: sources.get(match[0]), photos: bySource.get(canonicalProductUrl(match[0])) };
   });
   return { intro, items, ending: body.slice(position).trim() };
 }
@@ -113,7 +115,7 @@ export function PostDetail({ postId }: { postId: string }) {
   useEffect(() => { loadStudio().then(setData).catch((cause) => setError((cause as Error).message)); }, []);
   const post = useMemo(() => data?.posts.find((item) => item.id === postId), [data, postId]);
   const sections = useMemo(() => post && data ? readArticleSections(post, data.products) : null, [post, data]);
-  const hasPhotoArchive = post?.body.includes("https://www.29cm.co.kr/products/4121482") && getPostPhotoSets(post, data?.products ?? []).length === 5;
+  const hasPhotoArchive = sections?.items.some((item) => canonicalProductUrl(item.url) === "https://www.29cm.co.kr/products/4121482") && getPostPhotoSets(post!, data?.products ?? []).length === 5;
 
   async function copyArticle() {
     if (!post || !sections) return;

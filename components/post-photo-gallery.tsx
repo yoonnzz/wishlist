@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Check, Copy } from "lucide-react";
 import type { Post, Product } from "../lib/studio-types";
+import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-links";
 
 type Photo = { file: string; label: string; detail: string };
 export type PhotoSet = { source: string; brand: string; product: string; photos: [Photo, Photo] };
@@ -86,10 +87,18 @@ export function getPostPhotoSets(post: Post, products: Product[]): PhotoSet[] {
   return selectedIds.flatMap((id) => {
     const product = products.find((item) => item.id === id);
     if (!product) return [];
-    const match = product.url.match(/29cm\.co\.kr\/products\/(\d+)/);
+    const match = canonicalProductUrl(product.url).match(/29cm\.co\.kr\/products\/(\d+)/);
     const set = match && photosByProduct[match[1]];
     return set ? [{ source: `https://www.29cm.co.kr/products/${match[1]}`, ...set }] : [];
-  }).sort((left, right) => post.body.indexOf(left.source) - post.body.indexOf(right.source));
+  }).sort((left, right) => {
+    const position = (source: string) => {
+      const direct = post.body.indexOf(source);
+      if (direct >= 0) return direct;
+      const product = products.find((item) => canonicalProductUrl(item.url) === source);
+      return product ? post.body.indexOf(originalProductUrl(product.url)) : -1;
+    };
+    return position(left.source) - position(right.source);
+  });
 }
 
 export function PhotoSetView({ set, showHeading = true, showSource = true }: { set: PhotoSet; showHeading?: boolean; showSource?: boolean }) {

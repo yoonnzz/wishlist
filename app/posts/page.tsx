@@ -6,6 +6,7 @@ import { StudioShell } from "../../components/studio-shell";
 import { loadStudio, studioAction, type Post, type Product, type Store, type StudioData } from "../../lib/studio-types";
 import { makeWishlistDraft, WISHLIST_TEMPLATE_STEPS } from "../../lib/wishlist-template";
 import { registerWebMcpTool } from "../../lib/register-webmcp";
+import { originalProductUrl } from "../../lib/original-share-links";
 
 const emptyProduct = { store: "29CM" as Store, brand: "", name: "", model: "", color: "", url: "", note: "", allowReuse: false };
 const defaultStyle = "짧은 문단과 잦은 줄바꿈. 친근한 존댓말과 짧은 구어체를 자연스럽게 섞기. 관심을 가진 이유를 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.";
@@ -131,7 +132,7 @@ export default function PostsPage() {
           {candidates.length ? candidates.map((product) => <label className="candidate" key={product.id}>
             <input type="checkbox" disabled={Boolean(editingId)} checked={selectedIds.includes(product.id)} onChange={() => setSelectedIds((ids) => ids.includes(product.id) ? ids.filter((id) => id !== product.id) : [...ids, product.id])}/>
             <span><strong>{product.brand}</strong><small>{product.name}{product.color ? ` · ${product.color}` : ""}</small></span>
-            <a href={product.url} target="_blank" rel="noopener noreferrer" aria-label={`${product.name} 상품 링크`} onClick={(event) => event.stopPropagation()}><ArrowUpRight size={16}/></a>
+            <a href={originalProductUrl(product.url)} target="_blank" rel="noopener noreferrer" aria-label={`${product.name} 상품 링크`} onClick={(event) => event.stopPropagation()}><ArrowUpRight size={16}/></a>
           </label>) : <div className="empty-inline">직접 작성에 사용할 {store} 상품이 없어요. 이 화면은 선택 사항입니다.<button onClick={() => setSection("products")}>참고 상품 남기기 <ArrowUpRight size={14}/></button></div>}
         </div>
       </section>
@@ -164,7 +165,7 @@ export default function PostsPage() {
         </form>
       </section>
       <section className="panel"><div className="panel-heading"><div><span className="eyebrow">SAVED PIECES</span><h2>참고 상품</h2></div><span className="count-chip">{data.products.length}개</span></div>
-        {data.products.length ? <div className="saved-list">{data.products.map((product) => <div className="saved-item" key={product.id}><div><span className="mini-store">{product.store}</span> <strong>{product.brand}</strong><p>{product.name}{product.color ? ` · ${product.color}` : ""}</p><small>{product.usedInPostId ? "이미 글에 사용함" : "취향 참고용"}</small></div><a href={product.url} target="_blank" rel="noopener noreferrer" aria-label="상품 페이지 열기"><ArrowUpRight size={17}/></a></div>)}</div> : <div className="empty-inline">좋아하는 상품 예시가 있다면 남겨주세요. 없어도 됩니다.</div>}
+        {data.products.length ? <div className="saved-list">{data.products.map((product) => <div className="saved-item" key={product.id}><div><span className="mini-store">{product.store}</span> <strong>{product.brand}</strong><p>{product.name}{product.color ? ` · ${product.color}` : ""}</p><small>{product.usedInPostId ? "이미 글에 사용함" : "취향 참고용"}</small></div><a href={originalProductUrl(product.url)} target="_blank" rel="noopener noreferrer" aria-label="상품 페이지 열기"><ArrowUpRight size={17}/></a></div>)}</div> : <div className="empty-inline">좋아하는 상품 예시가 있다면 남겨주세요. 없어도 됩니다.</div>}
       </section>
       <section className="panel full"><div className="panel-heading"><div><span className="eyebrow">VOICE GUIDE</span><h2>말투와 취향 기준</h2></div></div>
         <p className="hint">보내주신 블로그 글 3편을 바탕으로 초안에 참고할 기준입니다. 원하는 표현과 피하고 싶은 표현을 덧붙여 주세요.</p>

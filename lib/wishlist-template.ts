@@ -1,4 +1,5 @@
 import type { Product, Store } from "./studio-types";
+import { originalProductUrl } from "./original-share-links";
 
 export const WISHLIST_TEMPLATE_STEPS = [
   "짧은 인사와 이번 위시리스트의 주제",
@@ -20,7 +21,7 @@ export function makeWishlistDraft(store: Store, products: Product[]) {
         "가격: 정상가 [확인 후 입력]",
         "",
         item.note || "[색·핏·디테일 중 마음에 든 이유와 입고 싶은 장면을 자연스럽게 적어주세요]",
-        item.url,
+        originalProductUrl(item.url),
         "",
       ]),
       "이번 위시리스트에서 가장 마음에 드는 아이템은 어떤 건가요? 🤍",
