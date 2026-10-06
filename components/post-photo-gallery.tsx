@@ -61,7 +61,6 @@ export function PhotoSetView({ set, showHeading = true, showSource = true }: { s
       <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
         <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
       </a>
-      <figcaption><strong>{photo.label}</strong><span>{photo.detail}</span></figcaption>
     </figure>)}</div>
     {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
   </section>;
