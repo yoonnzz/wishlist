@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ArrowUpRight, Check, Clipboard, PenLine, Plus, Save, ShoppingBag } from "lucide-react";
+import { ArrowUpRight, Check, PenLine, Plus, Save, ShoppingBag } from "lucide-react";
 import { StudioShell } from "../../components/studio-shell";
-import { PostPhotoGallery } from "../../components/post-photo-gallery";
 import { loadStudio, studioAction, type Post, type Product, type Store, type StudioData } from "../../lib/studio-types";
 import { registerWebMcpTool } from "../../lib/register-webmcp";
 
@@ -76,7 +75,9 @@ export default function PostsPage() {
       `오늘은 ${store}에서 눈여겨보고 있는 아이템들을 모아봤어요.`,
       "",
       ...selected.flatMap((item) => [
-        `${item.brand} ${item.name}${item.color ? ` (${item.color})` : ""}`,
+        item.brand,
+        `${item.name}${item.color ? ` (${item.color})` : ""}`,
+        "",
         item.note || "[이 상품이 마음에 든 이유를 적어주세요]",
         item.url,
         "",
@@ -186,7 +187,7 @@ export default function PostsPage() {
 
     {data && section === "archive" && <section className="panel archive-panel">
       <div className="panel-heading"><div><span className="eyebrow">DRAFT LIBRARY</span><h2>초안 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>
-      {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3>{post.title}</h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><PostPhotoGallery post={post} products={data.products}/><div className="archive-actions"><button onClick={() => editPost(post)}>수정하기</button><button onClick={async () => { await navigator.clipboard.writeText(`${post.title}\n\n${post.body}`); setNotice("제목과 본문을 복사했어요."); }}><Clipboard size={15}/> 복사하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
+      {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3><a href={`/posts/${post.id}`}>{post.title}</a></h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><a className="archive-read-link" href={`/posts/${post.id}`}>전체 글 보기 <ArrowUpRight size={15}/></a><button onClick={() => editPost(post)}>수정하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
     </section>}
   </StudioShell>;
 }

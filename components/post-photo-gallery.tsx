@@ -1,10 +1,10 @@
 import type { Post, Product } from "../lib/studio-types";
 
 type Photo = { file: string; label: string; detail: string };
-type PhotoSet = { brand: string; product: string; photos: [Photo, Photo] };
+export type PhotoSet = { source: string; brand: string; product: string; photos: [Photo, Photo] };
 
 const imageRoot = "/draft-images/2026-10-06-29cm";
-const photosByProduct: Record<string, PhotoSet> = {
+const photosByProduct: Record<string, Omit<PhotoSet, "source">> = {
   "3453926": {
     brand: "EAAH", product: "데님",
     photos: [
@@ -42,30 +42,38 @@ const photosByProduct: Record<string, PhotoSet> = {
   },
 };
 
-export function PostPhotoGallery({ post, products }: { post: Post; products: Product[] }) {
+export function getPostPhotoSets(post: Post, products: Product[]): PhotoSet[] {
   let selectedIds: string[] = [];
-  try { selectedIds = JSON.parse(post.productIds) as string[]; } catch { return null; }
-  const sets = selectedIds.flatMap((id) => {
+  try { selectedIds = JSON.parse(post.productIds) as string[]; } catch { return []; }
+  return selectedIds.flatMap((id) => {
     const product = products.find((item) => item.id === id);
     if (!product) return [];
     const match = product.url.match(/29cm\.co\.kr\/products\/(\d+)/);
     const set = match && photosByProduct[match[1]];
     return set ? [{ source: `https://www.29cm.co.kr/products/${match[1]}`, ...set }] : [];
   }).sort((left, right) => post.body.indexOf(left.source) - post.body.indexOf(right.source));
+}
+
+export function PhotoSetView({ set, showHeading = true, showSource = true }: { set: PhotoSet; showHeading?: boolean; showSource?: boolean }) {
+  return <section className="post-photo-set">
+    {showHeading && <h4>{set.brand} <span>{set.product}</span></h4>}
+    <div className="post-photo-grid">{set.photos.map((photo) => <figure key={photo.file}>
+      <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
+        <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
+      </a>
+      <figcaption><strong>{photo.label}</strong><span>{photo.detail}</span></figcaption>
+    </figure>)}</div>
+    {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
+  </section>;
+}
+
+export function PostPhotoGallery({ post, products }: { post: Post; products: Product[] }) {
+  const sets = getPostPhotoSets(post, products);
   if (!sets.length) return null;
 
   return <details className="post-photo-gallery" open>
     <summary>사진 포함 초안 · {sets.length}개 상품, {sets.length * 2}장</summary>
     <div className="post-photo-intro">사진을 눌러 한 장씩 저장하거나, <a href={`${imageRoot}/29cm-wishlist-photos.zip`} download="29cm-wishlist-photos.zip">사진 10장과 출처 한 번에 받기 ↓</a></div>
-    {sets.map((set) => <section className="post-photo-set" key={set.source}>
-      <h4>{set.brand} <span>{set.product}</span></h4>
-      <div className="post-photo-grid">{set.photos.map((photo) => <figure key={photo.file}>
-        <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
-          <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
-        </a>
-        <figcaption><strong>{photo.label}</strong><span>{photo.detail}</span></figcaption>
-      </figure>)}</div>
-      <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>
-    </section>)}
+    {sets.map((set) => <PhotoSetView set={set} key={set.source}/>) }
   </details>;
 }
