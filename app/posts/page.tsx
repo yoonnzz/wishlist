@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ArrowUpRight, Check, PenLine, Plus, Save, ShoppingBag } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import { ArrowUpRight, Check, PenLine, Plus, Save } from "lucide-react";
 import { StudioShell } from "../../components/studio-shell";
 import { loadStudio, studioAction, type Post, type Product, type Store, type StudioData } from "../../lib/studio-types";
-import { makeWishlistDraft, WISHLIST_TEMPLATE_STEPS } from "../../lib/wishlist-template";
 import { registerWebMcpTool } from "../../lib/register-webmcp";
 import { originalProductUrl } from "../../lib/original-share-links";
 
@@ -16,10 +15,8 @@ export default function PostsPage() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
-  const [section, setSection] = useState<"write" | "products" | "archive">("archive");
+  const [section, setSection] = useState<"edit" | "products" | "archive">("archive");
   const [productForm, setProductForm] = useState(emptyProduct);
-  const [store, setStore] = useState<Store>("29CM");
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -51,13 +48,6 @@ export default function PostsPage() {
     },
   }), []);
 
-  const candidates = useMemo(() => {
-    if (!data) return [];
-    const usedKeys = new Set(data.products.filter((p) => p.usedInPostId).map((p) => p.modelKey));
-    return data.products.filter((p) => p.store === store && !p.usedInPostId && (!usedKeys.has(p.modelKey) || p.reuseAllowed));
-  }, [data, store]);
-  const selected = candidates.filter((p) => selectedIds.includes(p.id));
-
   async function addProduct(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setNotice("");
     try {
@@ -68,31 +58,21 @@ export default function PostsPage() {
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
 
-  function fillOutline() {
-    if (!selected.length) return setError("본문에 넣을 상품을 먼저 선택해 주세요.");
-    const draft = makeWishlistDraft(store, selected);
-    setTitle(draft.title);
-    setBody(draft.body);
-    setNotice("위시리스트 기본 템플릿을 채웠어요. 사진과 감상을 확인하고 다듬어 주세요.");
-    setError("");
-  }
-
   async function savePost(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setNotice("");
     try {
-      if (editingId) await studioAction("post.update", { id: editingId, title, body, status: "draft" });
-      else await studioAction("post.create", { store, title, body, productIds: selectedIds });
+      if (!editingId) throw new Error("수정할 초안을 선택해 주세요.");
+      await studioAction("post.update", { id: editingId, title, body, status: "draft" });
       await refresh();
-      setEditingId(null); setTitle(""); setBody(""); setSelectedIds([]);
+      setEditingId(null); setTitle(""); setBody("");
       setNotice("초안을 저장했어요.");
       setSection("archive");
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
 
   function editPost(post: Post) {
-    setEditingId(post.id); setStore(post.store); setTitle(post.title); setBody(post.body);
-    setSelectedIds(JSON.parse(post.productIds));
-    setSection("write"); setNotice(""); setError("");
+    setEditingId(post.id); setTitle(post.title); setBody(post.body);
+    setSection("edit"); setNotice(""); setError("");
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
@@ -114,37 +94,22 @@ export default function PostsPage() {
     <div className="tab-row" role="tablist" aria-label="블로그 작업">
       <button className={section === "archive" ? "selected" : ""} onClick={() => setSection("archive")}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
       <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>취향 알려주기</button>
-      <button className={section === "write" ? "selected" : ""} onClick={() => setSection("write")}>직접 작성</button>
+      {editingId && <button className={section === "edit" ? "selected" : ""} onClick={() => setSection("edit")}>초안 수정</button>}
     </div>
     {error && <div className="flash error" role="alert">{error}</div>}
     {notice && <div className="flash success" role="status">{notice}</div>}
     {!data && !error && <div className="loading-state">작업실 자료를 불러오는 중이에요…</div>}
 
-    {data && section === "write" && <div className="work-grid">
-      <section className="panel">
-        <div className="panel-heading"><div><span className="eyebrow">STEP 01</span><h2>이번 글의 상품</h2></div><ShoppingBag size={22}/></div>
-        <div className="store-switch" aria-label="쇼핑몰 선택">
-          {(["29CM", "무신사"] as Store[]).map((item) => <button key={item} disabled={Boolean(editingId)} className={store === item ? "active" : ""} onClick={() => { setStore(item); setSelectedIds([]); }}>{item}</button>)}
-        </div>
-        {editingId && <p className="hint">저장된 초안을 수정하고 있어요. 상품 구성은 그대로 유지됩니다.</p>}
-        {!editingId && <p className="hint">직접 글을 쓰고 싶을 때만 사용하세요. 제가 작성하는 글의 상품은 따로 조사해 고릅니다.</p>}
-        <div className="candidate-list">
-          {candidates.length ? candidates.map((product) => <label className="candidate" key={product.id}>
-            <input type="checkbox" disabled={Boolean(editingId)} checked={selectedIds.includes(product.id)} onChange={() => setSelectedIds((ids) => ids.includes(product.id) ? ids.filter((id) => id !== product.id) : [...ids, product.id])}/>
-            <span><strong>{product.brand}</strong><small>{product.name}{product.color ? ` · ${product.color}` : ""}</small></span>
-            <a href={originalProductUrl(product.url)} target="_blank" rel="noopener noreferrer" aria-label={`${product.name} 상품 링크`} onClick={(event) => event.stopPropagation()}><ArrowUpRight size={16}/></a>
-          </label>) : <div className="empty-inline">직접 작성에 사용할 {store} 상품이 없어요. 이 화면은 선택 사항입니다.<button onClick={() => setSection("products")}>참고 상품 남기기 <ArrowUpRight size={14}/></button></div>}
-        </div>
-      </section>
+    {data && section === "edit" && editingId && <div className="edit-draft-wrap">
       <section className="panel writing-panel">
-        <div className="panel-heading"><div><span className="eyebrow">STEP 02</span><h2>나의 글로 완성하기</h2></div><PenLine size={22}/></div>
-        <div className="wishlist-template-note"><strong>위시리스트 기본 템플릿</strong><p>{WISHLIST_TEMPLATE_STEPS.join(" · ")}</p></div>
+        <div className="panel-heading"><div><span className="eyebrow">DRAFT EDIT</span><h2>초안 수정하기</h2></div><PenLine size={22}/></div>
+        <p className="hint">제목과 본문을 수정할 수 있어요. 상품 구성은 그대로 유지됩니다.</p>
         <form onSubmit={savePost}>
           <label className="field-label" htmlFor="post-title">제목</label>
           <input id="post-title" className="text-field" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="예: 10월에 눈여겨보는 아우터 위시리스트" required/>
           <label className="field-label" htmlFor="post-body">본문</label>
-          <textarea id="post-body" className="text-area post-body" value={body} onChange={(event) => setBody(event.target.value)} placeholder="상품을 선택한 뒤 본문 틀을 만들거나, 여기서 바로 글을 써보세요." required/>
-          <div className="form-actions"><button type="button" className="secondary-button" onClick={fillOutline} disabled={busy || Boolean(editingId)}>위시리스트 템플릿 적용</button><button className="primary-button" disabled={busy || !title.trim() || !body.trim() || (!editingId && !selectedIds.length)}><Save size={16}/> 초안 저장</button></div>
+          <textarea id="post-body" className="text-area post-body" value={body} onChange={(event) => setBody(event.target.value)} required/>
+          <div className="form-actions"><button type="button" className="secondary-button" onClick={() => setSection("archive")}>보관함으로</button><button className="primary-button" disabled={busy || !title.trim() || !body.trim()}><Save size={16}/> 수정 내용 저장</button></div>
           <p className="hint">구매하거나 사용하지 않은 상품은 실제 후기처럼 쓰지 않도록 확인해 주세요.</p>
         </form>
       </section>
