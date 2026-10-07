@@ -10,7 +10,7 @@ const error = (message: string, status = 400) => Response.json({ error: message 
 const storeName = (value: unknown) => value === "29CM" || value === "무신사" ? value : null;
 const parseIds = (value: unknown) => Array.isArray(value) ? value.filter((id): id is string => typeof id === "string").slice(0, 12) : [];
 const defaultPreferences = {
-  styleNotes: "짧은 문단과 잦은 줄바꿈. 친근한 존댓말과 짧은 구어체를 자연스럽게 섞기. 감탄·이모지는 과하지 않게. 상품에 관심이 생긴 이유와 코디할 장면을 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.",
+  styleNotes: "도입·상품 감상·맺음말은 한 줄에 문장 하나씩. 아주 짧은 문장 두 개만 자연스러울 때 한 줄에 함께 쓰기. 친근한 존댓말과 짧은 구어체를 자연스럽게 섞기. 감탄·이모지는 과하지 않게. 상품에 관심이 생긴 이유와 코디할 장면을 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.",
   favoriteNotes: "",
   avoidedNotes: "구매하거나 착용하지 않은 상품을 직접 써본 것처럼 말하지 않기. 확인되지 않은 가격이나 품절 여부를 단정하지 않기.",
 };
