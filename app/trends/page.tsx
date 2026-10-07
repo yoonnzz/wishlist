@@ -73,7 +73,13 @@ export default function TrendsPage() {
   const isPoetCore = issue.title === "2026 가을, 포엣 코어를 옷으로 읽어보면";
   const isParadox = issue.title === "단정한 옷에 낯선 질감 하나, 2026 가을의 믹스매치";
   const photos = isPoetCore ? poetCorePhotos : isParadox ? paradoxPhotos : null;
-  const paragraphs = issue.body.split("\n\n");
+  const body = isParadox
+    ? issue.body.replace(
+        "다른 컷에서는 재킷의 단정한 형태에 프린트와 퍼 모자가 더해지고, 또 다른 컷에서는 레더의 매끈함 옆에 니트의 부드러운 표면이 놓였어요.",
+        "마르니 컷에서는 레오퍼드 코트 아래 노란 톱과 꽃무늬 스커트가 겹쳐지고, 또 다른 컷에서는 레더의 매끈함 옆에 니트의 부드러운 표면이 놓였어요.",
+      )
+    : issue.body;
+  const paragraphs = body.split("\n\n");
   return <StudioShell active="trends">
     <div className="eyebrow">DISCOVER / TREND LETTER</div>
     <div className="page-head"><div><h1>트렌드 레터</h1><p>달라지는 패션의 흐름을 읽고, 내 위시리스트에 어울리는 것만 골라보세요.</p></div><button className="secondary-button" onClick={() => setCompose((value) => !value)}><Plus size={16}/> 레터 작성</button></div>
