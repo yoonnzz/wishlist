@@ -10,7 +10,6 @@ import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-l
 type ArticleItem = { heading: string; price?: string; comment: string; url: string; source?: string; photos?: PhotoSet };
 type ArticleSections = { intro: string; items: ArticleItem[]; ending: string };
 const blogDivider = "────────────────";
-const blogFontStyle = "font-family:'NanumSquare','나눔스퀘어',sans-serif;font-size:11pt";
 
 function isShopProductUrl(value: string) {
   try {
@@ -74,8 +73,8 @@ function htmlLines(value: string) {
 }
 
 function formatForBlogHtml(post: Post, sections: ArticleSections) {
-  const paragraph = (content: string, extraStyle = "", bold = false) => `<p style="${blogFontStyle};font-weight:400${extraStyle}"><span style="font-weight:${bold ? 700 : 400}">${content}</span></p>`;
-  if (!sections.items.length) return `<div style="${blogFontStyle};font-weight:400">${paragraph(escapeHtml(post.title), "", true)}${paragraph(htmlLines(post.body))}</div>`;
+  const paragraph = (content: string, extraStyle = "", bold = false) => `<p style="font-weight:400${extraStyle}"><span style="font-weight:${bold ? 700 : 400}">${content}</span></p>`;
+  if (!sections.items.length) return `<div>${paragraph(escapeHtml(post.title), "", true)}${paragraph(htmlLines(post.body))}</div>`;
   const blocks = [
     paragraph(escapeHtml(post.title), "", true),
     sections.intro && paragraph(htmlLines(sections.intro)),
@@ -85,12 +84,12 @@ function formatForBlogHtml(post: Post, sections: ArticleSections) {
       item.price && paragraph(htmlLines(item.price)),
       paragraph("[사진 1 삽입]<br>[사진 2 삽입]"),
       item.comment && paragraph(htmlLines(item.comment)),
-      paragraph(`<a style="${blogFontStyle};font-weight:400" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
+      paragraph(`<a style="font-weight:400" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
       paragraph(`사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
     ]),
     sections.ending && paragraph(htmlLines(sections.ending)),
   ];
-  return `<div style="${blogFontStyle};font-weight:400">${blocks.filter(Boolean).join("")}</div>`;
+  return `<div>${blocks.filter(Boolean).join("")}</div>`;
 }
 
 function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
@@ -148,6 +147,7 @@ export function PostDetail({ postId }: { postId: string }) {
         {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-for-naver.zip" download="29cm-wishlist-photos-for-naver.zip"><Download size={16}/> 순서대로 사진 10장 받기</a>}
       </div>
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 글자 서식이 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
+      <p className="post-detail-hint">나눔스퀘어 11로 붙여넣으려면 네이버 블로그 관리 → 기본 설정 → 기본 서체 설정에서 글꼴과 크기를 지정해 주세요. 복사한 글은 네이버의 기본 서체를 따릅니다.</p>
       {hasPhotoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
