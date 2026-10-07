@@ -22,7 +22,7 @@ const poetCoreSource = "https://www.musinsa.com/content/1466324428764847985";
 const poetCorePhotos = [
   { src: "/trend-images/2026-10-07-poet-core/layered-knit.webp", alt: "브라운 재킷 아래 질감 있는 니트를 겹쳐 입은 곽현주컬렉션 26 FW 런웨이", caption: "브라운 톤과 니트의 질감을 보여주는 런웨이 컷", sourceUrl: poetCoreSource, credit: "무신사 / 곽현주컬렉션 26 FW" },
   { src: "/trend-images/2026-10-07-poet-core/grey-tailoring.webp", alt: "그레이 재킷과 짙은 니트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "그레이 테일러링과 차분한 니트", sourceUrl: poetCoreSource, credit: "무신사 / 곽현주컬렉션 26 FW" },
-  { src: "/trend-images/2026-10-07-poet-core/celine-vogue.jpg", alt: "베이지 코트 아래 어두운 니트와 체크 바지를 겹쳐 입은 셀린느 2026 가을 룩", caption: "차분한 니트에 베이지 코트를 겹친 셀린느 룩", sourceUrl: "https://www.vogue.com/article/anatomy-of-a-look", credit: "Vogue / Celine · Phoebe McCaughley" },
+  { src: "/trend-images/2026-10-07-poet-core/celine-vogue.jpg", alt: "베이지 코트 아래 어두운 니트와 체크 바지를 겹쳐 입은 셀린느 2026 가을 룩", caption: "셀린느의 차분한 레이어링 · 포엣 코어로 소개된 컷은 아니에요", sourceUrl: "https://www.vogue.com/article/anatomy-of-a-look", credit: "Vogue / Celine · Phoebe McCaughley" },
 ];
 const paradoxSource = "https://www.musinsa.com/content/1466324428764847985";
 const paradoxPhotos = [
@@ -73,6 +73,9 @@ export default function TrendsPage() {
   const isPoetCore = issue.title === "2026 가을, 포엣 코어를 옷으로 읽어보면";
   const isParadox = issue.title === "단정한 옷에 낯선 질감 하나, 2026 가을의 믹스매치";
   const photos = isPoetCore ? poetCorePhotos : isParadox ? paradoxPhotos : null;
+  const summary = isParadox
+    ? "후디와 퍼, 다른 프린트끼리의 조합, 레더와 니트처럼 성격이 다른 옷을 겹쳤을 때 생기는 분위기를 사진으로 살펴봤어요."
+    : issue.summary;
   const body = isParadox
     ? issue.body.replace(
         "다른 컷에서는 재킷의 단정한 형태에 프린트와 퍼 모자가 더해지고, 또 다른 컷에서는 레더의 매끈함 옆에 니트의 부드러운 표면이 놓였어요.",
@@ -98,7 +101,7 @@ export default function TrendsPage() {
         <div className="letter-top"><span className="eyebrow">{issue.kicker}</span><span>{issue.createdAt.slice(0,10)}</span></div>
         {photos ? <figure className="trend-photo trend-photo-hero"><img src={photos[0].src} alt={photos[0].alt}/><figcaption>{photos[0].caption} · <a href={photos[0].sourceUrl} target="_blank" rel="noopener noreferrer">사진 출처: {photos[0].credit} <ArrowUpRight size={12}/></a></figcaption></figure> : <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>}
         <h2>{issue.title}</h2>
-        <p className="letter-summary">{issue.summary}</p>
+        <p className="letter-summary">{summary}</p>
         {isPoetCore && <section className="trend-definition" aria-labelledby="poet-core-definition">
           <h3 id="poet-core-definition">포엣 코어가 뭘까?</h3>
           <p>시인이나 작가의 서재에서 떠올릴 법한 차분하고 지적인 분위기를 옷으로 풀어낸 스타일이에요. 그레이·브라운 니트에 여유 있는 셔츠와 자연스럽게 떨어지는 바지를 입거나, 레이스 소매·타이처럼 낭만적인 디테일을 더하기도 해요. 정해진 옷 한 벌을 뜻하기보다 이런 분위기를 가리키는 이름에 가까워요.</p>
@@ -112,7 +115,7 @@ export default function TrendsPage() {
         <div className="letter-body">
           {paragraphs.map((paragraph, index) => <div key={index}>
             <p>{paragraph}</p>
-            {photos && index === 1 && <div className="trend-photo-pair">{photos.slice(1).map((photo) => <figure className="trend-photo" key={photo.src}><img src={photo.src} alt={photo.alt}/><figcaption>{photo.caption}<br/><a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">사진 출처: {photo.credit} <ArrowUpRight size={12}/></a></figcaption></figure>)}</div>}
+            {photos && index === (isPoetCore ? 2 : 1) && <><div className="trend-photo-pair">{photos.slice(1).map((photo) => <figure className="trend-photo" key={photo.src}><img src={photo.src} alt={photo.alt}/><figcaption>{photo.caption}<br/><a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">사진 출처: {photo.credit} <ArrowUpRight size={12}/></a></figcaption></figure>)}</div>{isPoetCore && <p>첫 사진은 그레이 재킷과 짙은 니트로 차분한 색과 질감을 보여줘요. 두 번째 셀린느 사진은 코트 아래 니트와 체크 바지를 겹친 방식이 눈에 들어와 골랐어요. Vogue가 이 룩을 포엣 코어라고 분류한 것은 아니고, 앞에서 말한 레이스 소매나 타이가 보이는 사진도 아니에요.</p>}</>}
           </div>)}
         </div>
         <div className="source-box"><h3><BookOpen size={17}/> 참고한 자료</h3>{issue.sourceUrls.map((url, index) => <a href={url} target="_blank" rel="noopener noreferrer" key={url}>자료 {index + 1} <ArrowUpRight size={15}/><small>{new URL(url).hostname}</small></a>)}</div>
