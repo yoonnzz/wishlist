@@ -85,6 +85,11 @@ export default function TrendsPage() {
         {isPoetCore ? <figure className="trend-photo trend-photo-hero"><img src={poetCorePhotos[0].src} alt={poetCorePhotos[0].alt}/><figcaption>{poetCorePhotos[0].caption} · <a href={poetCoreSource} target="_blank" rel="noopener noreferrer">사진 출처: 무신사 / 곽현주컬렉션 26 FW <ArrowUpRight size={12}/></a></figcaption></figure> : <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>}
         <h2>{issue.title}</h2>
         <p className="letter-summary">{issue.summary}</p>
+        {isPoetCore && <section className="trend-definition" aria-labelledby="poet-core-definition">
+          <h3 id="poet-core-definition">포엣 코어가 뭘까?</h3>
+          <p>시인이나 작가의 서재에서 떠올릴 법한 차분하고 지적인 분위기를 옷으로 풀어낸 스타일이에요. 그레이·브라운 니트에 여유 있는 셔츠와 자연스럽게 떨어지는 바지를 입거나, 레이스 소매·타이처럼 낭만적인 디테일을 더하기도 해요. 정해진 옷 한 벌을 뜻하기보다 이런 분위기를 가리키는 이름에 가까워요.</p>
+          <small>참고 · <a href={poetCoreSource} target="_blank" rel="noopener noreferrer">무신사 서울패션위크</a> · <a href="https://www.vogue.com/article/the-11-fashion-trends-that-defined-the-fall-2026-season" target="_blank" rel="noopener noreferrer">Vogue 2026 FW</a></small>
+        </section>}
         <div className="letter-body">
           {paragraphs.map((paragraph, index) => <div key={index}>
             <p>{paragraph}</p>
