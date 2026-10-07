@@ -141,7 +141,7 @@ export default function PostsPage() {
     </div>}
 
     {data && section === "archive" && <section className="panel archive-panel">
-      <div className="panel-heading"><div><span className="eyebrow">DRAFT LIBRARY</span><h2>초안 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>
+      <div className="panel-heading"><div><span className="eyebrow">WISHLIST LIBRARY</span><h2>위시리스트 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>
       {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3><a href={`/posts/${post.id}`}>{post.title}</a></h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><a className="archive-read-link" href={`/posts/${post.id}`}>전체 글 보기 <ArrowUpRight size={15}/></a><button onClick={() => editPost(post)}>수정하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
     </section>}
   </StudioShell>;

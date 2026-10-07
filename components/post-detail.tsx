@@ -135,10 +135,10 @@ export function PostDetail({ postId }: { postId: string }) {
   }
 
   return <StudioShell active="posts">
-    <div className="post-detail-top"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
+    <div className="post-detail-top"><a href="/posts"><ArrowLeft size={16}/> 위시리스트 보관함으로</a></div>
     {error && <div className="flash error" role="alert">{error}</div>}
     {!data && !error && <div className="loading-state">초안을 불러오는 중이에요…</div>}
-    {data && !post && <div className="panel post-detail-empty">초안을 찾지 못했어요. <a href="/posts">초안 보관함으로 돌아가기</a></div>}
+    {data && !post && <div className="panel post-detail-empty">초안을 찾지 못했어요. <a href="/posts">위시리스트 보관함으로 돌아가기</a></div>}
     {data && post && <article className="panel post-detail-article">
       <div className="post-detail-meta"><span>{post.store} 위시리스트</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0, 10)}</time></div>
       <h1>{post.title}</h1>
@@ -150,7 +150,7 @@ export function PostDetail({ postId }: { postId: string }) {
       <p className="post-detail-hint">나눔스퀘어 11로 붙여넣으려면 네이버 블로그 관리 → 기본 설정 → 기본 서체 설정에서 글꼴과 크기를 지정해 주세요. 복사한 글은 네이버의 기본 서체를 따릅니다.</p>
       {hasPhotoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
-      <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
+      <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 위시리스트 보관함으로</a></div>
     </article>}
   </StudioShell>;
 }
