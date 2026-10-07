@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Clipboard, Download } from "lucide-react";
 import { StudioShell } from "./studio-shell";
-import { embeddedPhoto, getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
+import { getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
 import { loadStudio, type Post, type Product, type StudioData } from "../lib/studio-types";
 import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-links";
 
@@ -73,26 +73,24 @@ function htmlLines(value: string) {
   return escapeHtml(value).replace(/\n/g, "<br>");
 }
 
-function formatForBlogHtml(post: Post, sections: ArticleSections, photoData?: Map<string, string>) {
-  const paragraph = (content: string, extraStyle = "") => `<p style="${blogFontStyle}${extraStyle}">${content}</p>`;
-  if (!sections.items.length) return `<div style="${blogFontStyle}">${paragraph(`<strong>${escapeHtml(post.title)}</strong>`)}${paragraph(htmlLines(post.body))}</div>`;
+function formatForBlogHtml(post: Post, sections: ArticleSections) {
+  const paragraph = (content: string, extraStyle = "", bold = false) => `<p style="${blogFontStyle};font-weight:400${extraStyle}"><span style="font-weight:${bold ? 700 : 400}">${content}</span></p>`;
+  if (!sections.items.length) return `<div style="${blogFontStyle};font-weight:400">${paragraph(escapeHtml(post.title), "", true)}${paragraph(htmlLines(post.body))}</div>`;
   const blocks = [
-    paragraph(`<strong>${escapeHtml(post.title)}</strong>`),
+    paragraph(escapeHtml(post.title), "", true),
     sections.intro && paragraph(htmlLines(sections.intro)),
     ...sections.items.flatMap((item) => [
       paragraph(blogDivider, ";text-align:center;color:#aeb9a2"),
-      paragraph(`<strong>${htmlLines(item.heading)}</strong>`),
+      paragraph(htmlLines(item.heading), "", true),
       item.price && paragraph(htmlLines(item.price)),
-      ...(item.photos ? item.photos.photos.map((photo, index) => photoData?.get(photo.file)
-        ? paragraph(`<img src="${photoData.get(photo.file)}" alt="${escapeHtml(item.photos!.brand)} ${index + 1}" style="display:block;max-width:100%;height:auto;margin:0 auto">`)
-        : paragraph(`[사진 ${index + 1} 삽입]`)) : [paragraph("[사진 1 삽입]<br>[사진 2 삽입]")]),
+      paragraph("[사진 1 삽입]<br>[사진 2 삽입]"),
       item.comment && paragraph(htmlLines(item.comment)),
-      paragraph(`<a style="${blogFontStyle}" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
+      paragraph(`<a style="${blogFontStyle};font-weight:400" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
       paragraph(`사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
     ]),
     sections.ending && paragraph(htmlLines(sections.ending)),
   ];
-  return `<div style="${blogFontStyle}">${blocks.filter(Boolean).join("")}</div>`;
+  return `<div style="${blogFontStyle};font-weight:400">${blocks.filter(Boolean).join("")}</div>`;
 }
 
 function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
@@ -114,7 +112,7 @@ function ArticleBody({ sections, store }: { sections: ArticleSections; store: Po
 export function PostDetail({ postId }: { postId: string }) {
   const [data, setData] = useState<StudioData | null>(null);
   const [error, setError] = useState("");
-  const [copyStatus, setCopyStatus] = useState<"idle" | "copying" | "rich-images" | "rich" | "plain">("idle");
+  const [copyStatus, setCopyStatus] = useState<"idle" | "rich" | "plain">("idle");
 
   useEffect(() => { loadStudio().then(setData).catch((cause) => setError((cause as Error).message)); }, []);
   const post = useMemo(() => data?.posts.find((item) => item.id === postId), [data, postId]);
@@ -123,32 +121,17 @@ export function PostDetail({ postId }: { postId: string }) {
 
   async function copyArticle() {
     if (!post || !sections) return;
-    setCopyStatus("copying");
     const plain = formatForBlog(post, sections);
     try {
       if (typeof ClipboardItem === "undefined" || !navigator.clipboard.write) throw new Error("서식 복사를 지원하지 않습니다.");
-      const hasPhotos = sections.items.some((item) => item.photos);
-      const html = (async () => {
-        const photos = sections.items.flatMap((item) => item.photos?.photos ?? []);
-        const entries = await Promise.all(photos.map(async (photo) => [photo.file, await embeddedPhoto(photo.file)] as const));
-        return formatForBlogHtml(post, sections, new Map(entries));
-      })();
       await navigator.clipboard.write([new ClipboardItem({
-        "text/html": html.then((value) => new Blob([value], { type: "text/html" })),
+        "text/html": new Blob([formatForBlogHtml(post, sections)], { type: "text/html" }),
         "text/plain": new Blob([plain], { type: "text/plain" }),
       })]);
-      setCopyStatus(hasPhotos ? "rich-images" : "rich");
+      setCopyStatus("rich");
     } catch {
-      try {
-        await navigator.clipboard.write([new ClipboardItem({
-          "text/html": new Blob([formatForBlogHtml(post, sections)], { type: "text/html" }),
-          "text/plain": new Blob([plain], { type: "text/plain" }),
-        })]);
-        setCopyStatus("rich");
-      } catch {
-        await navigator.clipboard.writeText(plain);
-        setCopyStatus("plain");
-      }
+      await navigator.clipboard.writeText(plain);
+      setCopyStatus("plain");
     }
   }
 
@@ -161,12 +144,11 @@ export function PostDetail({ postId }: { postId: string }) {
       <div className="post-detail-meta"><span>{post.store} 위시리스트</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0, 10)}</time></div>
       <h1>{post.title}</h1>
       <div className="post-detail-actions">
-        <button className="secondary-button" onClick={copyArticle} disabled={copyStatus === "copying"}><Clipboard size={16}/>{copyStatus === "copying" ? "사진 포함 복사 중…" : copyStatus === "rich-images" ? "사진·서식 포함 복사됨" : copyStatus === "rich" ? "서식만 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "사진 포함 전체 글 복사"}</button>
-        {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-v2.zip" download="29cm-wishlist-photos.zip"><Download size={16}/> 사진 10장 받기</a>}
+        <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "글 서식 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "네이버용 글 복사"}</button>
+        {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-for-naver.zip" download="29cm-wishlist-photos-for-naver.zip"><Download size={16}/> 순서대로 사진 10장 받기</a>}
       </div>
-      {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 굵은 글씨가 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
-      {copyStatus === "rich" && <p className="post-detail-hint" role="status">사진을 클립보드에 넣지 못해 글 서식만 복사됐어요. 아래 ‘사진 저장’으로 내려받아 네이버 사진 첨부로 넣어주세요.</p>}
-      {hasPhotoArchive && <p className="post-detail-hint">네이버에서 붙여넣은 사진이 보이지 않거나 저장되지 않으면 ‘사진 10장 받기’로 내려받아 네이버 사진 첨부로 올려주세요.</p>}
+      {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 글자 서식이 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
+      {hasPhotoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 초안 보관함으로</a></div>
     </article>}

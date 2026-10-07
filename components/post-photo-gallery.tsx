@@ -10,22 +10,6 @@ export type PhotoSet = { source: string; brand: string; product: string; photos:
 
 export const imageRoot = "/draft-images/2026-10-06-29cm";
 
-export async function embeddedPhoto(file: string) {
-  const response = await fetch(`${imageRoot}/${file}`);
-  if (!response.ok) throw new Error(`사진을 불러오지 못했습니다: ${file}`);
-  const bitmap = await createImageBitmap(await response.blob());
-  try {
-    const canvas = document.createElement("canvas");
-    const scale = Math.min(1, 1200 / bitmap.width);
-    canvas.width = Math.round(bitmap.width * scale);
-    canvas.height = Math.round(bitmap.height * scale);
-    const context = canvas.getContext("2d");
-    if (!context) throw new Error("사진을 변환하지 못했습니다.");
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    return canvas.toDataURL("image/jpeg", 0.88);
-  } finally { bitmap.close(); }
-}
-
 function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) {
   const [state, setState] = useState<"idle" | "copying" | "copied" | "error">("idle");
 
