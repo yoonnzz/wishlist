@@ -8,7 +8,7 @@ import { registerWebMcpTool } from "../../lib/register-webmcp";
 import { originalProductUrl } from "../../lib/original-share-links";
 
 const emptyProduct = { store: "29CM" as Store, brand: "", name: "", model: "", color: "", url: "", note: "", allowReuse: false };
-const defaultStyle = "도입·상품 감상·맺음말은 한 줄에 문장 하나씩. 아주 짧은 문장 두 개만 자연스러울 때 한 줄에 함께 쓰기. 첫 번째 위시리스트 글처럼 친근한 존댓말과 짧은 구어체로 쓰기. 감탄(!, ?!), 말줄임표(...), ,,ㅎㅎ와 작은 이모지를 문맥에 맞게 자연스럽게 섞되 같은 표현을 반복하지 않기. 관심을 가진 이유를 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.";
+const defaultStyle = "도입·상품 감상·맺음말은 한 줄에 문장 하나씩. 아주 짧은 문장 두 개만 자연스러울 때 한 줄에 함께 쓰기. 첫 번째 위시리스트 글처럼 친근한 존댓말과 짧은 구어체로 쓰기. 감탄(!, ?!), 말줄임표(...), ,,ㅎㅎ를 문맥에 맞게 자연스럽게 섞되 같은 표현을 반복하지 않기. 제목을 제외한 글 한 편의 본문 전체에 이모지는 정확히 1개만 넣기. 관심을 가진 이유를 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.";
 
 export default function PostsPage() {
   const [data, setData] = useState<StudioData | null>(null);
