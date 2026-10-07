@@ -34,7 +34,7 @@ export default function PostsPage() {
     }
   }
   useEffect(() => { refresh().catch((cause) => setError(cause.message)); }, []);
-  useEffect(() => registerWebMcpTool({
+  useEffect(() => { const unregisterProduct = registerWebMcpTool({
     name: "add_wishlist_product", title: "위시리스트 상품 저장",
     description: "현재 사용자의 29CM 또는 무신사 상품을 보관함에 저장하고 중복 모델을 확인합니다.",
     inputSchema: { type: "object", properties: { store: { type: "string", enum: ["29CM", "무신사"] }, brand: { type: "string" }, name: { type: "string" }, model: { type: "string" }, color: { type: "string" }, url: { type: "string" }, note: { type: "string" } }, required: ["store", "brand", "name", "model", "url"], additionalProperties: false },
@@ -46,7 +46,20 @@ export default function PostsPage() {
       setData(await loadStudio());
       return { id: (result.product as Product).id, saved: true };
     },
-  }), []);
+  });
+    const unregisterDraft = registerWebMcpTool({
+      name: "save_wishlist_draft", title: "위시리스트 초안 저장",
+      description: "선택한 상품으로 완성한 블로그 글을 검토 전 초안으로 저장합니다.",
+      inputSchema: { type: "object", properties: { store: { type: "string", enum: ["29CM", "무신사"] }, title: { type: "string" }, body: { type: "string" }, productIds: { type: "array", items: { type: "string" } } }, required: ["store", "title", "body", "productIds"], additionalProperties: false },
+      annotations: { readOnlyHint: false, untrustedContentHint: false },
+      async execute(input) {
+        const result = await studioAction("post.create", input as Record<string, unknown>);
+        setData(await loadStudio());
+        return { id: (result.post as Post).id, saved: true };
+      },
+    });
+    return () => { unregisterProduct(); unregisterDraft(); };
+  }, []);
 
   async function addProduct(event: FormEvent) {
     event.preventDefault(); setBusy(true); setError(""); setNotice("");

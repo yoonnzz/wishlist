@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, ArrowUpRight, Clipboard, Download } from "lucide-react";
 import { StudioShell } from "./studio-shell";
-import { getPostPhotoSets, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
+import { getPostPhotoSets, photoArchiveFor, PhotoSetView, type PhotoSet } from "./post-photo-gallery";
 import { loadStudio, type Post, type Product, type StudioData } from "../lib/studio-types";
 import { canonicalProductUrl, originalProductUrl } from "../lib/original-share-links";
 
@@ -116,7 +116,7 @@ export function PostDetail({ postId }: { postId: string }) {
   useEffect(() => { loadStudio().then(setData).catch((cause) => setError((cause as Error).message)); }, []);
   const post = useMemo(() => data?.posts.find((item) => item.id === postId), [data, postId]);
   const sections = useMemo(() => post && data ? readArticleSections(post, data.products) : null, [post, data]);
-  const hasPhotoArchive = sections?.items.some((item) => canonicalProductUrl(item.url) === "https://www.29cm.co.kr/products/4121482") && getPostPhotoSets(post!, data?.products ?? []).length === 5;
+  const photoArchive = post && data ? photoArchiveFor(getPostPhotoSets(post, data.products)) : null;
 
   async function copyArticle() {
     if (!post || !sections) return;
@@ -144,11 +144,11 @@ export function PostDetail({ postId }: { postId: string }) {
       <h1>{post.title}</h1>
       <div className="post-detail-actions">
         <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "글 서식 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "네이버용 글 복사"}</button>
-        {hasPhotoArchive && <a className="secondary-button" href="/draft-images/2026-10-06-29cm/29cm-wishlist-photos-for-naver.zip" download="29cm-wishlist-photos-for-naver.zip"><Download size={16}/> 순서대로 사진 10장 받기</a>}
+        {photoArchive && <a className="secondary-button" href={photoArchive} download><Download size={16}/> 순서대로 사진 10장 받기</a>}
       </div>
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 글자 서식이 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
       <p className="post-detail-hint">나눔스퀘어 11로 붙여넣으려면 네이버 블로그 관리 → 기본 설정 → 기본 서체 설정에서 글꼴과 크기를 지정해 주세요. 복사한 글은 네이버의 기본 서체를 따릅니다.</p>
-      {hasPhotoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
+      {photoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
       {sections && <ArticleBody sections={sections} store={post.store}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 위시리스트 보관함으로</a></div>
     </article>}

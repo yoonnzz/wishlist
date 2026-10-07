@@ -9,6 +9,14 @@ type Photo = { file: string; label: string; detail: string };
 export type PhotoSet = { source: string; brand: string; product: string; photos: [Photo, Photo] };
 
 export const imageRoot = "/draft-images/2026-10-06-29cm";
+const photoUrl = (photo: Photo) => photo.file.startsWith("/") ? photo.file : `${imageRoot}/${photo.file}`;
+export const photoArchiveFor = (sets: PhotoSet[]) => sets.length === 5
+  ? sets.some((set) => set.source.endsWith("/3442316"))
+    ? "/draft-images/2026-10-07-29cm-test/29cm-test-photos-for-naver.zip"
+    : sets.some((set) => set.source.endsWith("/4121482"))
+      ? "/draft-images/2026-10-06-29cm/29cm-wishlist-photos-for-naver.zip"
+      : null
+  : null;
 
 function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) {
   const [state, setState] = useState<"idle" | "copying" | "copied" | "error">("idle");
@@ -18,7 +26,7 @@ function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) 
     try {
       if (!navigator.clipboard?.write || typeof ClipboardItem === "undefined") throw new Error("Clipboard unavailable");
       const png = (async () => {
-        const response = await fetch(`${imageRoot}/${photo.file}`);
+        const response = await fetch(photoUrl(photo));
         if (!response.ok) throw new Error("Photo unavailable");
         const bitmap = await createImageBitmap(await response.blob());
         const canvas = document.createElement("canvas");
@@ -45,6 +53,26 @@ function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) 
 }
 
 const photosByProduct: Record<string, Omit<PhotoSet, "source">> = {
+  "3442316": { brand: "비터셀즈", product: "오버사이즈 셔츠", photos: [
+    { file: "/draft-images/2026-10-07-29cm-test/01-bittercells-fit.webp", label: "착용 컷", detail: "아이보리 셔츠의 여유로운 전체 핏" },
+    { file: "/draft-images/2026-10-07-29cm-test/02-bittercells-detail.webp", label: "상품 컷", detail: "아이보리 셔츠의 소매와 길이" },
+  ] },
+  "4155572": { brand: "로우클래식", product: "사이드 탭 숏 재킷", photos: [
+    { file: "/draft-images/2026-10-07-29cm-test/03-lowclassic-fit.jpg", label: "착용 컷", detail: "블랙 재킷의 전체 실루엣" },
+    { file: "/draft-images/2026-10-07-29cm-test/04-lowclassic-side.jpg", label: "옆모습", detail: "사이드 탭과 짧은 기장" },
+  ] },
+  "3808502": { brand: "엔오디", product: "스트링 롱 스커트", photos: [
+    { file: "/draft-images/2026-10-07-29cm-test/05-nod-fit.jpg", label: "착용 컷", detail: "블랙 스커트의 긴 스트레이트 핏" },
+    { file: "/draft-images/2026-10-07-29cm-test/06-nod-string.webp", label: "허리 디테일", detail: "블랙 스커트의 허리 스트링" },
+  ] },
+  "4129573": { brand: "에퓨어", product: "스퀘어 로퍼", photos: [
+    { file: "/draft-images/2026-10-07-29cm-test/07-epure-mood.webp", label: "분위기 컷", detail: "브라운 로퍼의 차분한 색감" },
+    { file: "/draft-images/2026-10-07-29cm-test/08-epure-detail.webp", label: "상품 컷", detail: "브라운 로퍼의 스퀘어 앞코" },
+  ] },
+  "4131887": { brand: "오스트카카", product: "멜로우 숄더백", photos: [
+    { file: "/draft-images/2026-10-07-29cm-test/09-ostkaka-fit.webp", label: "착용 컷", detail: "블랙 숄더백의 크기와 착용 모습" },
+    { file: "/draft-images/2026-10-07-29cm-test/10-ostkaka-mood.webp", label: "코디 컷", detail: "베이지 아우터와 매치한 블랙 숄더백" },
+  ] },
   "3453926": {
     brand: "EAAH", product: "데님",
     photos: [
@@ -106,12 +134,12 @@ export function PhotoSetView({ set, showHeading = true, showSource = true }: { s
   return <section className="post-photo-set">
     {showHeading && <h4>{set.brand} <span>{set.product}</span></h4>}
     <div className="post-photo-grid">{set.photos.map((photo) => <figure key={photo.file}>
-      <a href={`${imageRoot}/${photo.file}`} download={photo.file} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
-        <img src={`${imageRoot}/${photo.file}`} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
+      <a href={photoUrl(photo)} download={photo.file.split("/").pop()} aria-label={`${set.brand} ${set.product} ${photo.label} 사진 저장`}>
+        <img src={photoUrl(photo)} alt={`${set.brand} ${set.product} — ${photo.detail}`} loading="lazy" />
       </a>
       <div className="post-photo-actions">
         <CopyPhotoButton photo={photo} product={`${set.brand} ${set.product}`}/>
-        <a href={`${imageRoot}/${photo.file}`} download={photo.file}>사진 저장</a>
+        <a href={photoUrl(photo)} download={photo.file.split("/").pop()}>사진 저장</a>
       </div>
     </figure>)}</div>
     {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
@@ -124,7 +152,7 @@ export function PostPhotoGallery({ post, products }: { post: Post; products: Pro
 
   return <details className="post-photo-gallery" open>
     <summary>사진 포함 초안 · {sets.length}개 상품, {sets.length * 2}장</summary>
-    <div className="post-photo-intro">사진을 눌러 한 장씩 저장하거나, <a href={`${imageRoot}/29cm-wishlist-photos-v2.zip`} download="29cm-wishlist-photos.zip">사진 10장과 출처 한 번에 받기 ↓</a></div>
+    <div className="post-photo-intro">사진을 눌러 한 장씩 저장{photoArchiveFor(sets) && <>, 또는 <a href={photoArchiveFor(sets)!} download>사진 10장과 출처 한 번에 받기 ↓</a></>}</div>
     {sets.map((set) => <PhotoSetView set={set} key={set.source}/>) }
   </details>;
 }
