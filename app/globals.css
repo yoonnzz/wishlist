@@ -111,3 +111,5 @@ body{font-family:"Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif}
 .home-contents{margin-top:0}
 @media(max-width:570px){.section-intro h1{font-size:26px}}
 .edit-draft-wrap{max-width:820px;margin:0 auto}
+.trend-photo{margin:0}.trend-photo img{display:block;width:100%;height:auto;object-fit:cover}.trend-photo figcaption{padding:9px 0 0;color:#8b8277;font-size:11px;line-height:1.6}.trend-photo figcaption a{color:#766351;text-decoration:underline;text-underline-offset:2px}.trend-photo figcaption svg{display:inline;vertical-align:-2px}.trend-photo-hero img{max-height:610px;object-position:center 38%}.trend-photo-pair{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin:27px 0 31px}.trend-photo-pair img{aspect-ratio:4/5;object-position:center top}
+@media(max-width:570px){.trend-photo-pair{grid-template-columns:1fr;gap:22px}.trend-photo-pair img{aspect-ratio:auto;max-height:530px}.trend-photo-hero img{max-height:530px}}

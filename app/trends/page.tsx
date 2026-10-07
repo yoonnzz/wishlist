@@ -18,13 +18,20 @@ const initialIssue = {
   createdAt: "2026-10-06",
 };
 
+const poetCoreSource = "https://www.musinsa.com/content/1466324428764847985";
+const poetCorePhotos = [
+  { src: "/trend-images/2026-10-07-poet-core/layered-knit.webp", alt: "브라운 재킷 아래 질감 있는 니트를 겹쳐 입은 곽현주컬렉션 26 FW 런웨이", caption: "브라운 톤과 니트의 질감을 보여주는 런웨이 컷" },
+  { src: "/trend-images/2026-10-07-poet-core/grey-tailoring.webp", alt: "그레이 재킷과 짙은 니트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "그레이 테일러링과 차분한 니트" },
+  { src: "/trend-images/2026-10-07-poet-core/brown-coat.webp", alt: "브라운 하이넥 코트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "부드러운 브라운 색과 넉넉한 코트 실루엣" },
+];
+
 export default function TrendsPage() {
   const [data, setData] = useState<StudioData | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [compose, setCompose] = useState(false);
-  const [selected, setSelected] = useState<Letter | null>(null);
+  const [selected, setSelected] = useState<Letter | "initial" | null>(null);
   const [form, setForm] = useState({ title: "", kicker: "", summary: "", body: "", sourceUrls: "" });
 
   async function refresh() { setData(await loadStudio()); }
@@ -53,8 +60,12 @@ export default function TrendsPage() {
     } catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
 
-  const issue = selected ? { ...selected, sourceUrls: JSON.parse(selected.sourceUrls) as string[] } : initialIssue;
   const letters = data?.letters ?? [];
+  const currentLetter = selected === "initial" ? null : selected ?? letters[0];
+  const issue = currentLetter ? { ...currentLetter, sourceUrls: JSON.parse(currentLetter.sourceUrls) as string[] } : initialIssue;
+  const activeId = selected === "initial" || !currentLetter ? "initial" : currentLetter.id;
+  const isPoetCore = issue.title === "2026 가을, 포엣 코어를 옷으로 읽어보면";
+  const paragraphs = issue.body.split("\n\n");
   return <StudioShell active="trends">
     <div className="eyebrow">DISCOVER / TREND LETTER</div>
     <div className="page-head"><div><h1>트렌드 레터</h1><p>달라지는 패션의 흐름을 읽고, 내 위시리스트에 어울리는 것만 골라보세요.</p></div><button className="secondary-button" onClick={() => setCompose((value) => !value)}><Plus size={16}/> 레터 작성</button></div>
@@ -71,15 +82,20 @@ export default function TrendsPage() {
     <div className="letter-layout">
       <article className="letter-article">
         <div className="letter-top"><span className="eyebrow">{issue.kicker}</span><span>{issue.createdAt.slice(0,10)}</span></div>
-        <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>
+        {isPoetCore ? <figure className="trend-photo trend-photo-hero"><img src={poetCorePhotos[0].src} alt={poetCorePhotos[0].alt}/><figcaption>{poetCorePhotos[0].caption} · <a href={poetCoreSource} target="_blank" rel="noopener noreferrer">사진 출처: 무신사 / 곽현주컬렉션 26 FW <ArrowUpRight size={12}/></a></figcaption></figure> : <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>}
         <h2>{issue.title}</h2>
         <p className="letter-summary">{issue.summary}</p>
-        <div className="letter-body">{issue.body.split("\n\n").map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div>
+        <div className="letter-body">
+          {paragraphs.map((paragraph, index) => <div key={index}>
+            <p>{paragraph}</p>
+            {isPoetCore && index === 1 && <div className="trend-photo-pair">{poetCorePhotos.slice(1).map((photo) => <figure className="trend-photo" key={photo.src}><img src={photo.src} alt={photo.alt}/><figcaption>{photo.caption}<br/><a href={poetCoreSource} target="_blank" rel="noopener noreferrer">사진 출처: 무신사 / 곽현주컬렉션 26 FW <ArrowUpRight size={12}/></a></figcaption></figure>)}</div>}
+          </div>)}
+        </div>
         <div className="source-box"><h3><BookOpen size={17}/> 참고한 자료</h3>{issue.sourceUrls.map((url, index) => <a href={url} target="_blank" rel="noopener noreferrer" key={url}>자료 {index + 1} <ArrowUpRight size={15}/><small>{new URL(url).hostname}</small></a>)}</div>
       </article>
       <aside className="letter-side">
         <div className="panel"><span className="eyebrow">THE EDITOR'S NOTE</span><h3>트렌드를 고르는 기준</h3><p>유행을 그대로 따라가기보다, 내가 좋아하는 색과 핏에 닿는 흐름만 위시리스트에 담아요.</p><div className="mini-rule"><span>01</span> 어떤 변화가 보이나요?</div><div className="mini-rule"><span>02</span> 내 취향과 맞나요?</div><div className="mini-rule"><span>03</span> 실제 상품으로 이어지나요?</div></div>
-        <div className="panel"><span className="eyebrow">ISSUE ARCHIVE</span><h3>지난 레터</h3><button className={!selected ? "issue-link active" : "issue-link"} onClick={() => setSelected(null)}><span>2026.10.06</span>{initialIssue.title}</button>{letters.map((letter) => <button key={letter.id} className={selected?.id === letter.id ? "issue-link active" : "issue-link"} onClick={() => setSelected(letter)}><span>{letter.createdAt.slice(0,10)}</span>{letter.title}</button>)}</div>
+        <div className="panel"><span className="eyebrow">ISSUE ARCHIVE</span><h3>지난 레터</h3>{letters.map((letter) => <button key={letter.id} className={activeId === letter.id ? "issue-link active" : "issue-link"} onClick={() => setSelected(letter)}><span>{letter.createdAt.slice(0,10)}</span>{letter.title}</button>)}<button className={activeId === "initial" ? "issue-link active" : "issue-link"} onClick={() => setSelected("initial")}><span>2026.10.06</span>{initialIssue.title}</button></div>
       </aside>
     </div>
   </StudioShell>;
