@@ -23,3 +23,5 @@
 ## 2026-10-07 시험 레터 기록
 
 `포엣 코어`를 [Pinterest Predicts 2026](https://business.pinterest.com/pdf/pinterest-predicts/2026-trend-report/), [무신사 26 FW 서울패션위크](https://www.musinsa.com/content/1466324428764847985), [Vogue 2026 FW 리뷰](https://www.vogue.com/article/the-11-fashion-trends-that-defined-the-fall-2026-season)로 교차 확인했다. Pinterest는 글로벌 검색 전망, 무신사는 국내 런웨이 취재, Vogue는 해외 시즌 리뷰로 역할이 다르다. 네이버 쇼핑인사이트의 국내 검색 클릭 수치는 아직 확인하지 않았다.
+
+두 번째 시험 레터는 [무신사 26 FW 서울패션위크](https://www.musinsa.com/content/1466324428764847985)의 `패러독스 드레싱` 현장 보도와 [Vogue의 2026 가을 런웨이 스타일링 분석](https://www.vogue.com/article/anatomy-of-a-look)을 함께 참고한다. Vogue는 같은 용어를 쓰지 않고 서로 다른 질감·프린트·레이어링의 조합을 분석하므로, 두 매체가 동일한 트렌드명을 확정했다고 서술하지 않는다. 판매량이나 국내 검색 관심은 확인하지 않았다.
