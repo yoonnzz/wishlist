@@ -59,9 +59,8 @@ function formatForBlog(post: Post, sections: ArticleSections) {
     item.price || "",
     "[사진 1 삽입]\n[사진 2 삽입]",
     item.comment,
-    item.url,
-    `사진 출처: ${item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]")}`,
-  ].filter(Boolean).join("\n\n")), sections.ending].filter(Boolean).join("\n\n");
+    `${item.url}\n사진 출처 · ${item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]")}`,
+  ].filter(Boolean).join("\n\n")), sections.ending && `${blogDivider}\n\n${sections.ending}`].filter(Boolean).join("\n\n");
 }
 
 function escapeHtml(value: string) {
@@ -84,15 +83,17 @@ function formatForBlogHtml(post: Post, sections: ArticleSections) {
       item.price && paragraph(htmlLines(item.price)),
       paragraph("[사진 1 삽입]<br>[사진 2 삽입]"),
       item.comment && paragraph(htmlLines(item.comment)),
+      paragraph("&nbsp;"),
       paragraph(`<a style="font-weight:400" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
-      paragraph(`사진 출처: ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
+      paragraph(`사진 출처 · ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
     ]),
+    sections.ending && paragraph(blogDivider, ";text-align:center;color:#aeb9a2"),
     sections.ending && paragraph(htmlLines(sections.ending)),
   ];
   return `<div>${blocks.filter(Boolean).join("")}</div>`;
 }
 
-function ArticleBody({ sections, store }: { sections: ArticleSections; store: Post["store"] }) {
+function ArticleBody({ sections }: { sections: ArticleSections }) {
   return <div className="post-article-body">
     {sections.intro && <div className="post-article-intro">{sections.intro}</div>}
     {sections.items.map((item, index) => <section className="post-article-product" key={`${item.url}-${index}`}>
@@ -101,7 +102,7 @@ function ArticleBody({ sections, store }: { sections: ArticleSections; store: Po
       {item.price && <p className="post-article-price">{item.price}</p>}
       {item.photos && <PhotoSetView set={item.photos} showHeading={false} showSource={false}/>} 
       <div className="post-article-comment">{item.comment}</div>
-      <a className="post-article-product-link" href={item.url} target="_blank" rel="noopener noreferrer">{store} 상품 보러가기 <ArrowUpRight size={15}/></a>
+      <a className="post-article-product-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.url} <ArrowUpRight size={15}/></a>
       {(item.source || item.photos) && <p className="post-article-source">사진 출처 · {item.source || `29CM ${item.photos?.brand} 상품 페이지`}</p>}
     </section>)}
     {sections.ending && <div className="post-article-ending">{sections.ending}</div>}
@@ -149,7 +150,7 @@ export function PostDetail({ postId }: { postId: string }) {
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 글자 서식이 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
       <p className="post-detail-hint">나눔스퀘어 11로 붙여넣으려면 네이버 블로그 관리 → 기본 설정 → 기본 서체 설정에서 글꼴과 크기를 지정해 주세요. 복사한 글은 네이버의 기본 서체를 따릅니다.</p>
       {photoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}
-      {sections && <ArticleBody sections={sections} store={post.store}/>}
+      {sections && <ArticleBody sections={sections}/>}
       <div className="post-detail-bottom"><a href="/posts"><ArrowLeft size={16}/> 위시리스트 보관함으로</a></div>
     </article>}
   </StudioShell>;
