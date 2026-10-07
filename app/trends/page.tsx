@@ -20,15 +20,15 @@ const initialIssue = {
 
 const poetCoreSource = "https://www.musinsa.com/content/1466324428764847985";
 const poetCorePhotos = [
-  { src: "/trend-images/2026-10-07-poet-core/layered-knit.webp", alt: "브라운 재킷 아래 질감 있는 니트를 겹쳐 입은 곽현주컬렉션 26 FW 런웨이", caption: "브라운 톤과 니트의 질감을 보여주는 런웨이 컷" },
-  { src: "/trend-images/2026-10-07-poet-core/grey-tailoring.webp", alt: "그레이 재킷과 짙은 니트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "그레이 테일러링과 차분한 니트" },
-  { src: "/trend-images/2026-10-07-poet-core/brown-coat.webp", alt: "브라운 하이넥 코트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "부드러운 브라운 색과 넉넉한 코트 실루엣" },
+  { src: "/trend-images/2026-10-07-poet-core/layered-knit.webp", alt: "브라운 재킷 아래 질감 있는 니트를 겹쳐 입은 곽현주컬렉션 26 FW 런웨이", caption: "브라운 톤과 니트의 질감을 보여주는 런웨이 컷", sourceUrl: poetCoreSource, credit: "무신사 / 곽현주컬렉션 26 FW" },
+  { src: "/trend-images/2026-10-07-poet-core/grey-tailoring.webp", alt: "그레이 재킷과 짙은 니트를 입은 곽현주컬렉션 26 FW 런웨이", caption: "그레이 테일러링과 차분한 니트", sourceUrl: poetCoreSource, credit: "무신사 / 곽현주컬렉션 26 FW" },
+  { src: "/trend-images/2026-10-07-poet-core/celine-vogue.jpg", alt: "베이지 코트 아래 어두운 니트와 체크 바지를 겹쳐 입은 셀린느 2026 가을 룩", caption: "차분한 니트에 베이지 코트를 겹친 셀린느 룩", sourceUrl: "https://www.vogue.com/article/anatomy-of-a-look", credit: "Vogue / Celine · Phoebe McCaughley" },
 ];
 const paradoxSource = "https://www.musinsa.com/content/1466324428764847985";
 const paradoxPhotos = [
-  { src: "/trend-images/2026-10-07-paradox/look18.jpg", alt: "짙은 후디에 풍성한 퍼 재킷과 긴 스커트를 함께 입은 26 FW 런웨이", caption: "편한 후디와 볼륨 있는 퍼, 긴 스커트가 만난 룩" },
-  { src: "/trend-images/2026-10-07-paradox/look30.jpg", alt: "테일러드 재킷에 화려한 프린트와 풍성한 퍼 모자를 더한 26 FW 런웨이", caption: "단정한 재킷 위에 색과 질감을 더한 룩" },
-  { src: "/trend-images/2026-10-07-paradox/look15.jpg", alt: "짙은 레더 재킷에 부드러운 니트와 가벼운 원피스를 겹쳐 입은 26 FW 런웨이", caption: "레더의 단단함과 니트의 부드러움을 겹친 룩" },
+  { src: "/trend-images/2026-10-07-paradox/look18.jpg", alt: "짙은 후디에 풍성한 퍼 재킷과 긴 스커트를 함께 입은 26 FW 런웨이", caption: "편한 후디와 볼륨 있는 퍼, 긴 스커트가 만난 룩", sourceUrl: paradoxSource, credit: "무신사 / 26 FW 서울패션위크" },
+  { src: "/trend-images/2026-10-07-paradox/marni-vogue.jpg", alt: "레오퍼드 코트에 노란 톱과 꽃무늬 스커트를 겹친 마르니 2026 가을 룩", caption: "서로 다른 패턴과 질감을 한데 섞은 마르니 룩", sourceUrl: "https://www.vogue.com/article/anatomy-of-a-look", credit: "Vogue / Marni · Phoebe McCaughley" },
+  { src: "/trend-images/2026-10-07-paradox/look15.jpg", alt: "짙은 레더 재킷에 부드러운 니트와 가벼운 원피스를 겹쳐 입은 26 FW 런웨이", caption: "레더의 단단함과 니트의 부드러움을 겹친 룩", sourceUrl: paradoxSource, credit: "무신사 / 26 FW 서울패션위크" },
 ];
 
 export default function TrendsPage() {
@@ -73,8 +73,6 @@ export default function TrendsPage() {
   const isPoetCore = issue.title === "2026 가을, 포엣 코어를 옷으로 읽어보면";
   const isParadox = issue.title === "단정한 옷에 낯선 질감 하나, 2026 가을의 믹스매치";
   const photos = isPoetCore ? poetCorePhotos : isParadox ? paradoxPhotos : null;
-  const photoSource = isPoetCore ? poetCoreSource : paradoxSource;
-  const photoCredit = isPoetCore ? "무신사 / 곽현주컬렉션 26 FW" : "무신사 / 26 FW 서울패션위크";
   const paragraphs = issue.body.split("\n\n");
   return <StudioShell active="trends">
     <div className="eyebrow">DISCOVER / TREND LETTER</div>
@@ -92,7 +90,7 @@ export default function TrendsPage() {
     <div className="letter-layout">
       <article className="letter-article">
         <div className="letter-top"><span className="eyebrow">{issue.kicker}</span><span>{issue.createdAt.slice(0,10)}</span></div>
-        {photos ? <figure className="trend-photo trend-photo-hero"><img src={photos[0].src} alt={photos[0].alt}/><figcaption>{photos[0].caption} · <a href={photoSource} target="_blank" rel="noopener noreferrer">사진 출처: {photoCredit} <ArrowUpRight size={12}/></a></figcaption></figure> : <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>}
+        {photos ? <figure className="trend-photo trend-photo-hero"><img src={photos[0].src} alt={photos[0].alt}/><figcaption>{photos[0].caption} · <a href={photos[0].sourceUrl} target="_blank" rel="noopener noreferrer">사진 출처: {photos[0].credit} <ArrowUpRight size={12}/></a></figcaption></figure> : <div className="letter-illustration"><span className="il-number">01</span><span className="il-text">A NEW<br/>POINT OF VIEW</span><div className="il-shape one"/><div className="il-shape two"/></div>}
         <h2>{issue.title}</h2>
         <p className="letter-summary">{issue.summary}</p>
         {isPoetCore && <section className="trend-definition" aria-labelledby="poet-core-definition">
@@ -108,7 +106,7 @@ export default function TrendsPage() {
         <div className="letter-body">
           {paragraphs.map((paragraph, index) => <div key={index}>
             <p>{paragraph}</p>
-            {photos && index === 1 && <div className="trend-photo-pair">{photos.slice(1).map((photo) => <figure className="trend-photo" key={photo.src}><img src={photo.src} alt={photo.alt}/><figcaption>{photo.caption}<br/><a href={photoSource} target="_blank" rel="noopener noreferrer">사진 출처: {photoCredit} <ArrowUpRight size={12}/></a></figcaption></figure>)}</div>}
+            {photos && index === 1 && <div className="trend-photo-pair">{photos.slice(1).map((photo) => <figure className="trend-photo" key={photo.src}><img src={photo.src} alt={photo.alt}/><figcaption>{photo.caption}<br/><a href={photo.sourceUrl} target="_blank" rel="noopener noreferrer">사진 출처: {photo.credit} <ArrowUpRight size={12}/></a></figcaption></figure>)}</div>}
           </div>)}
         </div>
         <div className="source-box"><h3><BookOpen size={17}/> 참고한 자료</h3>{issue.sourceUrls.map((url, index) => <a href={url} target="_blank" rel="noopener noreferrer" key={url}>자료 {index + 1} <ArrowUpRight size={15}/><small>{new URL(url).hostname}</small></a>)}</div>

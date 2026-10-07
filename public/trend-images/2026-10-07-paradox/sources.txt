@@ -9,4 +9,9 @@ look18.jpg: 원문 섹션의 18.jpg 컷. 후디와 볼륨 있는 퍼, 긴 스커
 look30.jpg: 원문 섹션의 30.jpg 컷. 패치워크 재킷과 프린트, 퍼 모자.
 look15.jpg: 원문 섹션의 15.jpg 컷. 레더 재킷과 니트, 가벼운 이너.
 
+marni-vogue.jpg: Vogue 「Anatomy of a Look」의 Marni 2026 가을 룩.
+원문: https://www.vogue.com/article/anatomy-of-a-look
+원본 이미지: https://assets.vogue.com/photos/6aad58b6b6e2d68c96bd21bc/master/w_1600%2Cc_limit/Vogue_001_01_X1_0076.jpg
+원문 사진 크레딧: Courtesy of Marni, Phoebe McCaughley.
+
 사진은 원문 페이지에 실린 실제 컷으로, 색상 변경이나 AI 생성은 하지 않았습니다.
