@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 
 export function StudioShell({ active, children }: { active: "home" | "trends" | "posts" | "taste"; children: ReactNode }) {
   return <div className="site-frame">
-    <div className="edition-bar"><span>MY PICKS · PERSONAL FASHION JOURNAL</span><span>29CM × 무신사 <span className="edition-divider">/</span> 월 · 수 · 금 08:00</span></div>
+    <div className="edition-bar"><span>MY PICKS · PERSONAL FASHION JOURNAL</span><span>29CM × 무신사 <span className="edition-divider">/</span> 매일 08:00</span></div>
     <header className="site-header">
       <a className="site-wordmark" href="/" aria-label="My Picks 홈"><span>MY</span> PICKS<span className="wordmark-period">.</span><small>WISHLIST JOURNAL</small></a>
       <a className="header-blog-link" href="https://blog.naver.com/yoon__z" target="_blank" rel="noopener noreferrer">윤지의 네이버 블로그 <ArrowUpRight size={15}/></a>

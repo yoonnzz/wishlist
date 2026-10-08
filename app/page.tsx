@@ -13,6 +13,6 @@ export default function Home() {
       </div>
     </section>
 
-    <section className="home-rhythm" aria-label="글 작성 목표"><span>THE WRITING RHYTHM</span><strong>월요일 · 수요일 · 금요일, 오전 8시</strong><p>29CM와 무신사 시리즈를 번갈아 준비하는 목표예요.</p></section>
+    <section className="home-rhythm" aria-label="글 작성 목표"><span>THE WRITING RHYTHM</span><strong>매일 오전 8시</strong><p>29CM와 무신사 시리즈를 번갈아 준비하는 목표예요.</p></section>
   </StudioShell>;
 }

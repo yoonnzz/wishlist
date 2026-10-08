@@ -127,7 +127,7 @@ export default function PostsPage() {
 
   return <StudioShell active={section === "products" ? "taste" : "posts"}>
     <div className="eyebrow">WRITE / WISHLIST SERIES</div>
-    <div className="page-head"><div><h1>블로그 위시리스트</h1><p>{data?.canEdit ? "제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요." : "29CM와 무신사에서 고른 위시리스트 글을 읽어보세요."}</p></div><div className="schedule-pill">작성 목표 · 월 · 수 · 금 <strong>08:00</strong></div></div>
+    <div className="page-head"><div><h1>블로그 위시리스트</h1><p>{data?.canEdit ? "제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요." : "29CM와 무신사에서 고른 위시리스트 글을 읽어보세요."}</p></div><div className="schedule-pill">작성 목표 · 매일 <strong>08:00</strong></div></div>
     <div className="tab-row" role="tablist" aria-label="블로그 작업">
       <button className={section === "archive" ? "selected" : ""} onClick={() => { setSection("archive"); window.history.replaceState(null, "", "/posts"); }}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
       <button className={section === "products" ? "selected" : ""} onClick={() => { setSection("products"); window.history.replaceState(null, "", "/posts?tab=taste"); }}>취향 알려주기</button>

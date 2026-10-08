@@ -1,6 +1,6 @@
 # 자동 위시리스트 초안 검토 기준
 
-월·수·금 오전 8시 자동 초안을 저장하기 직전에 적용한다. 취향의 근거와 거절 사례는 [RECOMMENDATION_GUIDE.md](RECOMMENDATION_GUIDE.md), 문장과 글 순서는 [WRITING_GUIDE.md](WRITING_GUIDE.md)·[WISHLIST_TEMPLATE.md](WISHLIST_TEMPLATE.md), 날짜별 가격 증거는 `PRICE_SNAPSHOT_YYYY-MM-DD.md`에 남긴다.
+매일 오전 8시 자동 초안을 저장하기 직전에 적용한다. 취향의 근거와 거절 사례는 [RECOMMENDATION_GUIDE.md](RECOMMENDATION_GUIDE.md), 문장과 글 순서는 [WRITING_GUIDE.md](WRITING_GUIDE.md)·[WISHLIST_TEMPLATE.md](WISHLIST_TEMPLATE.md), 날짜별 가격 증거는 `PRICE_SNAPSHOT_YYYY-MM-DD.md`에 남긴다.
 
 ## 지금까지 드러난 실패와 재발 방지
 
