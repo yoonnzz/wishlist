@@ -90,20 +90,27 @@ export async function POST(request: Request) {
       const [product] = await db.insert(products).values({ id: crypto.randomUUID(), ownerId: user.userId, store, brand, name, modelKey, color, url, note, reuseAllowed: payload.allowReuse === true }).returning();
       return Response.json({ product }, { status: 201 });
     }
-    if (action === "post.create") {
+    if (action === "post.create" || action === "post.import") {
+      const imported = action === "post.import";
+      const sourceUrl = clean(payload.sourceUrl, 1000);
+      if (imported && !/^https:\/\/blog\.naver\.com\/yoon__z\/\d+$/.test(sourceUrl)) return error("가져올 네이버 블로그 글 주소를 확인해 주세요.");
       const store = storeName(payload.store);
       const title = clean(payload.title, 200);
       const body = clean(payload.body, 20000);
       const ids = [...new Set(parseIds(payload.productIds))];
-      const tasteIds = [...new Set(parseIds(payload.tasteExampleIds))];
-      const tasteBasis = clean(payload.tasteBasis, 2000);
+      const tasteIds = imported ? [] : [...new Set(parseIds(payload.tasteExampleIds))];
+      const tasteBasis = imported ? `기존 네이버 글 가져오기: ${sourceUrl}` : clean(payload.tasteBasis, 2000);
       if (!store || !title || !body || !ids.length) return error("쇼핑몰, 제목, 본문, 상품을 입력해 주세요.");
+      if (imported) {
+        const existing = await db.select({ id: posts.id }).from(posts).where(and(eq(posts.ownerId, user.userId), eq(posts.tasteBasis, tasteBasis))).limit(1);
+        if (existing.length) return error("이미 사이트에 가져온 네이버 글이에요.", 409);
+      }
       const selected = await db.select().from(products).where(and(eq(products.ownerId, user.userId), inArray(products.id, ids)));
       if (selected.length !== ids.length || selected.some((p) => p.store !== store)) return error("선택한 상품을 다시 확인해 주세요.");
       if (new Set(selected.map((p) => p.modelKey)).size !== selected.length) return error("같은 모델이 한 글에 여러 번 선택됐어요.", 409);
       const all = await db.select().from(products).where(eq(products.ownerId, user.userId));
       if (selected.some((p) => !p.reuseAllowed && all.some((old) => old.modelKey === p.modelKey && old.usedInPostId))) return error("이전에 사용한 모델이 포함되어 있습니다.", 409);
-      const allTaste = await db.select().from(tasteExamples).where(eq(tasteExamples.ownerId, user.userId));
+      const allTaste = imported ? [] : await db.select().from(tasteExamples).where(eq(tasteExamples.ownerId, user.userId));
       const pendingTaste = allTaste.filter((example) => !example.firstUsedInPostId);
       if (tasteIds.some((tasteId) => !allTaste.some((example) => example.id === tasteId))) return error("취향 참고 상품을 다시 확인해 주세요.");
       if (pendingTaste.some((example) => !tasteIds.includes(example.id))) return error("새로 저장한 취향 상품을 모두 확인하고 이번 글의 취향 근거에 포함해 주세요.");

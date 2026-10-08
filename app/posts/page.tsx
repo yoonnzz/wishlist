@@ -69,7 +69,18 @@ export default function PostsPage() {
         return { id: (result.post as Post).id, saved: true };
       },
     });
-    return () => { unregisterProduct(); unregisterTaste(); unregisterDraft(); };
+    const unregisterImport = registerWebMcpTool({
+      name: "import_naver_wishlist_draft", title: "네이버 글을 초안으로 가져오기",
+      description: "사용자가 이미 작성한 네이버 블로그 글을 위시리스트 보관함에 복사합니다. 새 취향 상품의 다음 글 반영 상태는 유지합니다.",
+      inputSchema: { type: "object", properties: { sourceUrl: { type: "string" }, store: { type: "string", enum: ["29CM", "무신사"] }, title: { type: "string" }, body: { type: "string" }, productIds: { type: "array", items: { type: "string" } } }, required: ["sourceUrl", "store", "title", "body", "productIds"], additionalProperties: false },
+      annotations: { readOnlyHint: false, untrustedContentHint: false },
+      async execute(input) {
+        const result = await studioAction("post.import", input as Record<string, unknown>);
+        setData(await loadStudio());
+        return { id: (result.post as Post).id, saved: true };
+      },
+    });
+    return () => { unregisterProduct(); unregisterTaste(); unregisterDraft(); unregisterImport(); };
   }, []);
 
   async function addTaste(event: FormEvent) {
