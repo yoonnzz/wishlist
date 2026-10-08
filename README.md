@@ -5,7 +5,6 @@
 ## 바로가기
 
 - [My Picks 위시리스트 스튜디오](https://my-picks-wishlist-studio.sooyeon-jun-0389.chatgpt.site/)
-- [네이버 블로그](https://blog.naver.com/yoon__z)
 - [블로그 자동화 발표 자료 PDF](docs/blog-automation-presentation.pdf)
 
 ## 이용 흐름
