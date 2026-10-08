@@ -72,13 +72,13 @@ function htmlLines(value: string) {
 }
 
 function formatForBlogHtml(post: Post, sections: ArticleSections) {
-  const paragraph = (content: string, extraStyle = "", bold = false) => `<p style="font-weight:400${extraStyle}"><span style="font-weight:${bold ? 700 : 400}">${content}</span></p>`;
-  if (!sections.items.length) return `<div>${paragraph(escapeHtml(post.title), "", true)}${paragraph(htmlLines(post.body))}</div>`;
+  const paragraph = (content: string, extraStyle = "", bold = false) => `<p align="center" style="font-weight:400;text-align:center${extraStyle}"><span style="font-weight:${bold ? 700 : 400}">${content}</span></p>`;
+  if (!sections.items.length) return `<div style="text-align:center">${paragraph(escapeHtml(post.title), "", true)}${paragraph(htmlLines(post.body))}</div>`;
   const blocks = [
     paragraph(escapeHtml(post.title), "", true),
     sections.intro && paragraph(htmlLines(sections.intro)),
     ...sections.items.flatMap((item) => [
-      paragraph(blogDivider, ";text-align:center;color:#aeb9a2"),
+      paragraph(blogDivider, ";color:#aeb9a2"),
       paragraph(htmlLines(item.heading), "", true),
       item.price && paragraph(htmlLines(item.price)),
       paragraph("[사진 1 삽입]<br>[사진 2 삽입]"),
@@ -87,10 +87,10 @@ function formatForBlogHtml(post: Post, sections: ArticleSections) {
       paragraph(`<a style="font-weight:400" href="${escapeHtml(item.url)}">${escapeHtml(item.url)}</a>`),
       paragraph(`사진 출처 · ${escapeHtml(item.source || (item.photos ? `29CM ${item.photos.brand} 상품 페이지` : "[실제 사진 원출처 입력]"))}`),
     ]),
-    sections.ending && paragraph(blogDivider, ";text-align:center;color:#aeb9a2"),
+    sections.ending && paragraph(blogDivider, ";color:#aeb9a2"),
     sections.ending && paragraph(htmlLines(sections.ending)),
   ];
-  return `<div>${blocks.filter(Boolean).join("")}</div>`;
+  return `<div style="text-align:center">${blocks.filter(Boolean).join("")}</div>`;
 }
 
 function ArticleBody({ sections }: { sections: ArticleSections }) {

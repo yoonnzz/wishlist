@@ -20,6 +20,7 @@
 .wishlist-template-note{border:1px solid #e0e7d6;background:#f7faf2;border-radius:11px;padding:12px 14px;margin:-3px 0 19px}.wishlist-template-note strong{display:block;color:#4f6944;font-size:12px}.wishlist-template-note p{margin:5px 0 0;color:#879485;font-size:11px;line-height:1.6}
 .post-photo-grid figure{position:relative}.post-photo-actions{display:flex;justify-content:center;align-items:center;gap:12px;padding:9px}.post-photo-actions>a{font-size:11px;color:#536e4a;text-decoration:underline}.post-photo-copy-button{display:inline-flex;align-items:center;gap:5px;border:1px solid #e4e8df;border-radius:7px;background:#fff;color:#384736;box-shadow:0 2px 8px #0000001a;padding:7px 9px;font-size:11px;font-weight:700;cursor:pointer}.post-photo-copy-button:hover,.post-photo-copy-button:focus-visible{background:#f2f7e9}.post-photo-copy-button:disabled{cursor:wait;opacity:.7}
 .post-article-price{text-align:center;color:#687565;font-size:12px;line-height:1.8;margin:-12px auto 25px;max-width:460px;word-break:keep-all;white-space:pre-line}
+.post-detail-article h1,.post-article-body,.post-body{text-align:center}
 @media(max-width:800px){.post-detail-article{padding:27px 20px 38px}.post-article-body{margin-top:30px}.post-article-product .post-photo-grid img{max-height:620px}}
 
 /* Editorial journal refresh */
