@@ -31,7 +31,7 @@ const tools = [
   },
   {
     name: "save_wishlist_draft",
-    description: "Save one researched wishlist draft. Read all saved tasteExamples first and compare each newly added example's photo, silhouette, texture and mood with candidate photos. Include every pending taste example ID and a concrete comparison in tasteBasis. This private rationale is not copied into the blog article. Duplicate product models are rejected.",
+    description: "Save one researched wishlist draft. Aim for seven independently verified products in a new post; do not pad with weak matches. Read all saved tasteExamples first and compare each newly added example's photo, silhouette, texture and mood with candidate photos. Include every pending taste example ID and a concrete comparison in tasteBasis. This private rationale is not copied into the blog article. Duplicate product models are rejected.",
     inputSchema: {
       type: "object",
       properties: {
