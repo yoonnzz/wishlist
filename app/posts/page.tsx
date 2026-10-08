@@ -34,6 +34,7 @@ export default function PostsPage() {
     }
   }
   useEffect(() => { refresh().catch((cause) => setError(cause.message)); }, []);
+  useEffect(() => { if (new URLSearchParams(window.location.search).get("tab") === "taste") setSection("products"); }, []);
   useEffect(() => { const unregisterProduct = registerWebMcpTool({
     name: "add_wishlist_product", title: "위시리스트 상품 저장",
     description: "현재 사용자의 29CM 또는 무신사 상품을 보관함에 저장하고 중복 모델을 확인합니다.",
@@ -124,12 +125,12 @@ export default function PostsPage() {
     catch (cause) { setError((cause as Error).message); } finally { setBusy(false); }
   }
 
-  return <StudioShell active="posts">
+  return <StudioShell active={section === "products" ? "taste" : "posts"}>
     <div className="eyebrow">WRITE / WISHLIST SERIES</div>
     <div className="page-head"><div><h1>블로그 위시리스트</h1><p>{data?.canEdit ? "제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요." : "29CM와 무신사에서 고른 위시리스트 글을 읽어보세요."}</p></div><div className="schedule-pill">작성 목표 · 월 · 수 · 금 <strong>08:00</strong></div></div>
     <div className="tab-row" role="tablist" aria-label="블로그 작업">
-      <button className={section === "archive" ? "selected" : ""} onClick={() => setSection("archive")}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
-      {data?.canEdit && <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>취향 알려주기</button>}
+      <button className={section === "archive" ? "selected" : ""} onClick={() => { setSection("archive"); window.history.replaceState(null, "", "/posts"); }}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
+      <button className={section === "products" ? "selected" : ""} onClick={() => { setSection("products"); window.history.replaceState(null, "", "/posts?tab=taste"); }}>취향 알려주기</button>
       {data?.canEdit && editingId && <button className={section === "edit" ? "selected" : ""} onClick={() => setSection("edit")}>초안 수정</button>}
     </div>
     {error && <div className="flash error" role="alert">{error}</div>}
@@ -175,6 +176,12 @@ export default function PostsPage() {
         <button className="secondary-button" onClick={savePreferences} disabled={busy}><Save size={15}/> 기준 저장</button>
       </section>
     </div>}
+
+    {data && !data.canEdit && section === "products" && <section className="panel taste-signin-panel">
+      <div className="panel-heading"><div><span className="eyebrow">MY TASTE</span><h2>취향 알려주기</h2></div></div>
+      <p className="hint">취향 상품 저장과 수정은 작업실 소유자만 할 수 있어요. 로그인하면 저장한 취향과 상품 링크를 확인할 수 있습니다.</p>
+      <a className="primary-button" href="/signin-with-chatgpt?return_to=%2Fposts%3Ftab%3Dtaste" target="_top">작업실 로그인</a>
+    </section>}
 
     {data && section === "archive" && <section className="panel archive-panel">
       <div className="panel-heading"><div><span className="eyebrow">WISHLIST LIBRARY</span><h2>위시리스트 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>

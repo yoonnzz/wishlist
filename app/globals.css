@@ -39,6 +39,7 @@ body{font-family:"Apple SD Gothic Neo","Malgun Gothic",Arial,sans-serif}
 .editorial-nav{min-height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;gap:clamp(22px,4vw,62px);padding:0 24px;position:relative}
 .editorial-nav a{height:52px;display:flex;align-items:center;border-bottom:2px solid transparent;color:#77736c;font-size:12px;font-weight:700;white-space:nowrap}
 .editorial-nav a:hover,.editorial-nav a.active{color:var(--ink);border-bottom-color:#9b6c55}
+.taste-signin-panel .primary-button{display:inline-flex;align-items:center;justify-content:center;margin-top:12px}
 .editorial-nav>span{position:absolute;right:clamp(20px,5vw,78px);font:italic 13px Georgia,serif;color:#9a8273}
 .main-area{flex:1;width:100%;min-width:0}
 .content-area{max-width:1370px;padding:48px clamp(20px,5vw,78px) 90px}
