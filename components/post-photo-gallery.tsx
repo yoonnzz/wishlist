@@ -11,7 +11,9 @@ export type PhotoSet = { source: string; brand: string; product: string; photos:
 export const imageRoot = "/draft-images/2026-10-06-29cm";
 const photoUrl = (photo: Photo) => photo.file.startsWith("/") ? photo.file : `${imageRoot}/${photo.file}`;
 export const photoArchiveFor = (sets: PhotoSet[]) => sets.length === 5
-  ? sets.some((set) => set.source.endsWith("/3442316"))
+  ? sets.some((set) => set.source.endsWith("/7229538"))
+    ? "/draft-images/2026-10-08-musinsa/musinsa-wishlist-photos-for-naver.zip"
+    : sets.some((set) => set.source.endsWith("/3442316"))
     ? "/draft-images/2026-10-07-29cm-test/29cm-test-photos-for-naver.zip"
     : sets.some((set) => set.source.endsWith("/4121482"))
       ? "/draft-images/2026-10-06-29cm/29cm-wishlist-photos-for-naver.zip"
@@ -53,6 +55,26 @@ function CopyPhotoButton({ photo, product }: { photo: Photo; product: string }) 
 }
 
 const photosByProduct: Record<string, Omit<PhotoSet, "source">> = {
+  "7229538": { brand: "라메레이", product: "High Neck Drape Blouse", photos: [
+    { file: "/draft-images/2026-10-08-musinsa/01-lamerei-blouse-fit.jpg", label: "착용 컷", detail: "아이보리 블라우스의 전체 실루엣" },
+    { file: "/draft-images/2026-10-08-musinsa/02-lamerei-blouse-detail.jpg", label: "다른 각도", detail: "아이보리 블라우스의 목선과 허리 디테일" },
+  ] },
+  "7226160": { brand: "라메레이", product: "Nonfade Suede High-Neck Half Jacket", photos: [
+    { file: "/draft-images/2026-10-08-musinsa/03-lamerei-jacket-fit.jpg", label: "착용 컷", detail: "모스 브라운 재킷의 전체 핏" },
+    { file: "/draft-images/2026-10-08-musinsa/04-lamerei-jacket-detail.jpg", label: "다른 각도", detail: "높은 칼라와 사선 여밈" },
+  ] },
+  "7074419": { brand: "아수라", product: "WOOL WRAP KNIT", photos: [
+    { file: "/draft-images/2026-10-08-musinsa/05-asura-knit-fit.jpg", label: "착용 컷", detail: "브라운 랩 니트의 전체 핏" },
+    { file: "/draft-images/2026-10-08-musinsa/06-asura-knit-detail.jpg", label: "디테일 컷", detail: "랩 여밈과 니트 소재감" },
+  ] },
+  "7301080": { brand: "그로브", product: "FELINE DOUBLE LAYERED PANTS", photos: [
+    { file: "/draft-images/2026-10-08-musinsa/07-grove-pants-fit.jpg", label: "착용 컷", detail: "베이지 팬츠의 전체 실루엣" },
+    { file: "/draft-images/2026-10-08-musinsa/08-grove-pants-detail.jpg", label: "디테일 컷", detail: "겹쳐진 허리선" },
+  ] },
+  "5859065": { brand: "글로니", product: "G CLASSIC BRAIDED BELT", photos: [
+    { file: "/draft-images/2026-10-08-musinsa/09-glowny-belt-fit.jpg", label: "착용 컷", detail: "블랙 벨트의 착용 모습" },
+    { file: "/draft-images/2026-10-08-musinsa/10-glowny-belt-detail.jpg", label: "디테일 컷", detail: "가죽 짜임과 버클" },
+  ] },
   "3442316": { brand: "비터셀즈", product: "오버사이즈 셔츠", photos: [
     { file: "/draft-images/2026-10-07-29cm-test/01-bittercells-fit.webp", label: "착용 컷", detail: "아이보리 셔츠의 여유로운 전체 핏" },
     { file: "/draft-images/2026-10-07-29cm-test/02-bittercells-detail.webp", label: "상품 컷", detail: "아이보리 셔츠의 소매와 길이" },
@@ -116,9 +138,9 @@ export function getPostPhotoSets(post: Post, products: Product[]): PhotoSet[] {
   return selectedIds.flatMap((id) => {
     const product = products.find((item) => item.id === id);
     if (!product) return [];
-    const match = canonicalProductUrl(product.url).match(/29cm\.co\.kr\/products\/(\d+)/);
-    const set = match && photosByProduct[match[1]];
-    return set ? [{ source: `https://www.29cm.co.kr/products/${match[1]}`, ...set }] : [];
+    const match = canonicalProductUrl(product.url).match(/(29cm\.co\.kr|musinsa\.com)\/products\/(\d+)/);
+    const set = match && photosByProduct[match[2]];
+    return set ? [{ source: `https://www.${match[1]}/products/${match[2]}`, ...set }] : [];
   }).sort((left, right) => {
     const position = (source: string) => {
       const direct = post.body.indexOf(source);
@@ -142,7 +164,7 @@ export function PhotoSetView({ set, showHeading = true, showSource = true }: { s
         <a href={photoUrl(photo)} download={photo.file.split("/").pop()}>사진 저장</a>
       </div>
     </figure>)}</div>
-    {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">29CM {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
+    {showSource && <p className="post-photo-source">사진 출처 · <a href={set.source} target="_blank" rel="noopener noreferrer">{set.source.includes("musinsa.com") ? "무신사" : "29CM"} {set.brand} 상품 페이지 <span aria-hidden="true">↗</span></a></p>}
   </section>;
 }
 
