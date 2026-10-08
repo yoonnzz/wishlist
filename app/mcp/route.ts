@@ -47,6 +47,22 @@ const tools = [
     },
   },
   {
+    name: "import_naver_wishlist_draft",
+    description: "Copy an already-written post from the owner's Naver blog into the site's draft library without marking pending taste examples as used.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        sourceUrl: { type: "string" },
+        store: { type: "string", enum: ["29CM", "무신사"] },
+        title: { type: "string" },
+        body: { type: "string" },
+        productIds: { type: "array", items: { type: "string" }, minItems: 1 },
+      },
+      required: ["sourceUrl", "store", "title", "body", "productIds"],
+      additionalProperties: false,
+    },
+  },
+  {
     name: "save_trend_letter",
     description: "Save a source-backed fashion trend letter for the owner. Include working source URLs and distinguish reporting from your own editorial inference.",
     inputSchema: {
@@ -82,6 +98,7 @@ export async function POST(request: Request) {
   else if (name === "save_wishlist_product") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "product.add", ...args, allowReuse: false }) }));
   else if (name === "save_taste_example") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "taste.add", ...args }) }));
   else if (name === "save_wishlist_draft") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "post.create", ...args }) }));
+  else if (name === "import_naver_wishlist_draft") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "post.import", ...args }) }));
   else if (name === "save_trend_letter") response = await postStudio(new Request(request.url, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ action: "letter.add", ...args }) }));
   else return Response.json({ jsonrpc: "2.0", id: input.id ?? null, error: { code: -32602, message: "Unknown tool" } }, { status: 400 });
   const value = await response.json();
