@@ -2,7 +2,8 @@ import { and, desc, eq, inArray } from "drizzle-orm";
 import { env } from "cloudflare:workers";
 import { getChatGPTUser } from "../../chatgpt-auth";
 import { getDb } from "../../../db";
-import { posts, preferences, products, trendLetters } from "../../../db/schema";
+import { posts, preferences, products, tasteExamples, trendLetters } from "../../../db/schema";
+import { inspectTasteProduct } from "../../../lib/taste-product";
 
 type Payload = Record<string, unknown>;
 const clean = (value: unknown, max = 5000) => typeof value === "string" ? value.trim().slice(0, max) : "";
@@ -35,16 +36,17 @@ export async function GET() {
   const canEdit = user?.userId === ownerId;
   try {
     const db = getDb();
-    const [productRows, postRows, letterRows, preferenceRows] = await Promise.all([
+    const [productRows, postRows, letterRows, preferenceRows, tasteRows] = await Promise.all([
       db.select().from(products).where(eq(products.ownerId, ownerId)).orderBy(desc(products.createdAt)).limit(200),
       db.select().from(posts).where(eq(posts.ownerId, ownerId)).orderBy(desc(posts.createdAt)).limit(100),
       db.select().from(trendLetters).where(eq(trendLetters.ownerId, ownerId)).orderBy(desc(trendLetters.createdAt)).limit(50),
       canEdit ? db.select().from(preferences).where(eq(preferences.ownerId, ownerId)).limit(1) : Promise.resolve([]),
+      canEdit ? db.select().from(tasteExamples).where(eq(tasteExamples.ownerId, ownerId)).orderBy(desc(tasteExamples.createdAt)).limit(200) : Promise.resolve([]),
     ]);
     const publicProducts = productRows.filter((product) => product.usedInPostId).map(({ ownerId: _ownerId, note: _note, modelKey: _modelKey, ...product }) => ({ ...product, note: "", modelKey: "" }));
-    const publicPosts = postRows.map(({ ownerId: _ownerId, ...post }) => post);
+    const publicPosts = postRows.map(({ ownerId: _ownerId, tasteBasis: _tasteBasis, tasteExampleIds: _tasteExampleIds, ...post }) => ({ ...post, tasteBasis: canEdit ? _tasteBasis : "", tasteExampleIds: canEdit ? _tasteExampleIds : "[]" }));
     const publicLetters = letterRows.map(({ ownerId: _ownerId, ...letter }) => letter);
-    return Response.json({ products: canEdit ? productRows : publicProducts, posts: publicPosts, letters: publicLetters, preferences: canEdit ? preferenceRows[0] ?? defaultPreferences : null, canEdit });
+    return Response.json({ products: canEdit ? productRows : publicProducts, tasteExamples: canEdit ? tasteRows : [], posts: publicPosts, letters: publicLetters, preferences: canEdit ? preferenceRows[0] ?? defaultPreferences : null, canEdit });
   } catch (cause) {
     console.error("studio load failed", cause);
     return error("자료를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.", 500);
@@ -60,6 +62,18 @@ export async function POST(request: Request) {
   const action = clean(payload.action, 40);
   const db = getDb();
   try {
+    if (action === "taste.add") {
+      const url = clean(payload.url, 1000);
+      const note = clean(payload.note, 1000);
+      if (!url) return error("상품 링크를 넣어 주세요.");
+      let info;
+      try { info = await inspectTasteProduct(url); }
+      catch (cause) { return error(cause instanceof Error ? cause.message : "상품 정보를 확인하지 못했어요.", 422); }
+      const existing = await db.select({ id: tasteExamples.id }).from(tasteExamples).where(and(eq(tasteExamples.ownerId, user.userId), eq(tasteExamples.productUrl, info.productUrl))).limit(1);
+      if (existing.length) return error("이미 취향 참고 상품에 저장한 링크예요.", 409);
+      const [example] = await db.insert(tasteExamples).values({ id: crypto.randomUUID(), ownerId: user.userId, url, note, ...info }).returning();
+      return Response.json({ tasteExample: example }, { status: 201 });
+    }
     if (action === "product.add") {
       const store = storeName(payload.store);
       const brand = clean(payload.brand, 120);
@@ -81,18 +95,26 @@ export async function POST(request: Request) {
       const title = clean(payload.title, 200);
       const body = clean(payload.body, 20000);
       const ids = [...new Set(parseIds(payload.productIds))];
+      const tasteIds = [...new Set(parseIds(payload.tasteExampleIds))];
+      const tasteBasis = clean(payload.tasteBasis, 2000);
       if (!store || !title || !body || !ids.length) return error("쇼핑몰, 제목, 본문, 상품을 입력해 주세요.");
       const selected = await db.select().from(products).where(and(eq(products.ownerId, user.userId), inArray(products.id, ids)));
       if (selected.length !== ids.length || selected.some((p) => p.store !== store)) return error("선택한 상품을 다시 확인해 주세요.");
       if (new Set(selected.map((p) => p.modelKey)).size !== selected.length) return error("같은 모델이 한 글에 여러 번 선택됐어요.", 409);
       const all = await db.select().from(products).where(eq(products.ownerId, user.userId));
       if (selected.some((p) => !p.reuseAllowed && all.some((old) => old.modelKey === p.modelKey && old.usedInPostId))) return error("이전에 사용한 모델이 포함되어 있습니다.", 409);
+      const allTaste = await db.select().from(tasteExamples).where(eq(tasteExamples.ownerId, user.userId));
+      const pendingTaste = allTaste.filter((example) => !example.firstUsedInPostId);
+      if (tasteIds.some((tasteId) => !allTaste.some((example) => example.id === tasteId))) return error("취향 참고 상품을 다시 확인해 주세요.");
+      if (pendingTaste.some((example) => !tasteIds.includes(example.id))) return error("새로 저장한 취향 상품을 모두 확인하고 이번 글의 취향 근거에 포함해 주세요.");
+      if (pendingTaste.length && tasteBasis.length < 20) return error("저장한 취향 상품의 핏·분위기가 이번 상품 선정에 어떻게 반영됐는지 근거를 적어 주세요.");
       const id = crypto.randomUUID();
       const statements = [
-        env.DB!.prepare("INSERT INTO posts (id, owner_id, store, title, body, status, product_ids) VALUES (?, ?, ?, ?, ?, 'draft', ?)").bind(id, user.userId, store, title, body, JSON.stringify(ids)),
+        env.DB!.prepare("INSERT INTO posts (id, owner_id, store, title, body, status, product_ids, taste_example_ids, taste_basis) VALUES (?, ?, ?, ?, ?, 'draft', ?, ?, ?)").bind(id, user.userId, store, title, body, JSON.stringify(ids), JSON.stringify(tasteIds), tasteBasis),
         ...selected.filter((p) => !all.some((old) => old.modelKey === p.modelKey && old.usedInPostId)).map((p) =>
           env.DB!.prepare("INSERT INTO used_models (owner_id, model_key, post_id) VALUES (?, ?, ?)").bind(user.userId, p.modelKey, id)),
         ...selected.map((p) => env.DB!.prepare("UPDATE products SET used_in_post_id = ? WHERE id = ? AND owner_id = ? AND used_in_post_id IS NULL").bind(id, p.id, user.userId)),
+        ...pendingTaste.map((example) => env.DB!.prepare("UPDATE taste_examples SET first_used_in_post_id = ? WHERE id = ? AND owner_id = ? AND first_used_in_post_id IS NULL").bind(id, example.id, user.userId)),
       ];
       await env.DB!.batch(statements);
       const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);

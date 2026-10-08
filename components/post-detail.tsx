@@ -147,6 +147,7 @@ export function PostDetail({ postId }: { postId: string }) {
         <button className="secondary-button" onClick={copyArticle}><Clipboard size={16}/>{copyStatus === "rich" ? "글 서식 복사됨" : copyStatus === "plain" ? "텍스트만 복사됨" : "네이버용 글 복사"}</button>
         {photoArchive && <a className="secondary-button" href={photoArchive} download><Download size={16}/> 순서대로 사진 10장 받기</a>}
       </div>
+      {data.canEdit && post.tasteBasis && <aside className="taste-basis"><strong>이번 글에 반영한 취향</strong>{post.tasteBasis}</aside>}
       {copyStatus === "plain" && <p className="post-detail-hint" role="status">이 브라우저에서는 글자 서식이 복사되지 않았어요. 크롬에서 다시 복사해 주세요.</p>}
       <p className="post-detail-hint">나눔스퀘어 11로 붙여넣으려면 네이버 블로그 관리 → 기본 설정 → 기본 서체 설정에서 글꼴과 크기를 지정해 주세요. 복사한 글은 네이버의 기본 서체를 따릅니다.</p>
       {photoArchive && <p className="post-detail-hint">글을 붙여넣은 뒤 압축을 풀고, 본문의 [사진 1 삽입]·[사진 2 삽입] 자리에 네이버 에디터의 ‘사진’ 버튼으로 번호순 파일을 첨부해 주세요. 붙여넣기만으로는 네이버에 사진이 안정적으로 등록되지 않습니다.</p>}

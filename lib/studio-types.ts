@@ -3,16 +3,21 @@ export type Product = {
   id: string; store: Store; brand: string; name: string; modelKey: string; color: string;
   url: string; note: string; reuseAllowed: boolean; usedInPostId: string | null; createdAt: string;
 };
+export type TasteExample = {
+  id: string; store: Store; brand: string; name: string; model: string; color: string;
+  url: string; productUrl: string; imageUrl: string; note: string;
+  firstUsedInPostId: string | null; createdAt: string;
+};
 export type Post = {
   id: string; store: Store; title: string; body: string; status: "draft" | "done";
-  productIds: string; createdAt: string; updatedAt: string;
+  productIds: string; tasteExampleIds: string; tasteBasis: string; createdAt: string; updatedAt: string;
 };
 export type Letter = {
   id: string; title: string; kicker: string; summary: string; body: string;
   sourceUrls: string; createdAt: string;
 };
 export type Preferences = { styleNotes: string; favoriteNotes: string; avoidedNotes: string };
-export type StudioData = { products: Product[]; posts: Post[]; letters: Letter[]; preferences: Preferences | null; canEdit: boolean };
+export type StudioData = { products: Product[]; tasteExamples: TasteExample[]; posts: Post[]; letters: Letter[]; preferences: Preferences | null; canEdit: boolean };
 
 export async function loadStudio(): Promise<StudioData> {
   const response = await fetch("/api/studio", { cache: "no-store" });
