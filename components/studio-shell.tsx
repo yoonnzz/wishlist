@@ -15,6 +15,6 @@ export function StudioShell({ active, children }: { active: "home" | "trends" | 
       <span>나의 취향을 모으는 곳</span>
     </nav>
     <main className="main-area"><div className="content-area">{children}</div></main>
-    <footer className="site-footer"><strong>MY PICKS.</strong><span>좋아하는 옷을 오래 바라보고, 천천히 고르는 기록.</span><span>29CM × 무신사 · 개인 작업실</span></footer>
+    <footer className="site-footer"><strong>MY PICKS.</strong><span>좋아하는 옷을 오래 바라보고, 천천히 고르는 기록.</span><a href="/signin-with-chatgpt?return_to=%2Fposts" target="_top">작업실 관리</a></footer>
   </div>;
 }

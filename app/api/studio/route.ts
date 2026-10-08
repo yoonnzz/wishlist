@@ -30,16 +30,21 @@ function validShopUrl(value: string, store: "29CM" | "무신사") {
 
 export async function GET() {
   const user = await getChatGPTUser();
-  if (!user) return error("로그인이 필요합니다.", 401);
+  const ownerId = env.PUBLIC_OWNER_ID;
+  if (!ownerId) return error("작업실 설정을 확인해 주세요.", 503);
+  const canEdit = user?.userId === ownerId;
   try {
     const db = getDb();
     const [productRows, postRows, letterRows, preferenceRows] = await Promise.all([
-      db.select().from(products).where(eq(products.ownerId, user.userId)).orderBy(desc(products.createdAt)).limit(200),
-      db.select().from(posts).where(eq(posts.ownerId, user.userId)).orderBy(desc(posts.createdAt)).limit(100),
-      db.select().from(trendLetters).where(eq(trendLetters.ownerId, user.userId)).orderBy(desc(trendLetters.createdAt)).limit(50),
-      db.select().from(preferences).where(eq(preferences.ownerId, user.userId)).limit(1),
+      db.select().from(products).where(eq(products.ownerId, ownerId)).orderBy(desc(products.createdAt)).limit(200),
+      db.select().from(posts).where(eq(posts.ownerId, ownerId)).orderBy(desc(posts.createdAt)).limit(100),
+      db.select().from(trendLetters).where(eq(trendLetters.ownerId, ownerId)).orderBy(desc(trendLetters.createdAt)).limit(50),
+      canEdit ? db.select().from(preferences).where(eq(preferences.ownerId, ownerId)).limit(1) : Promise.resolve([]),
     ]);
-    return Response.json({ products: productRows, posts: postRows, letters: letterRows, preferences: preferenceRows[0] ?? defaultPreferences });
+    const publicProducts = productRows.filter((product) => product.usedInPostId).map(({ ownerId: _ownerId, note: _note, modelKey: _modelKey, ...product }) => ({ ...product, note: "", modelKey: "" }));
+    const publicPosts = postRows.map(({ ownerId: _ownerId, ...post }) => post);
+    const publicLetters = letterRows.map(({ ownerId: _ownerId, ...letter }) => letter);
+    return Response.json({ products: canEdit ? productRows : publicProducts, posts: publicPosts, letters: publicLetters, preferences: canEdit ? preferenceRows[0] ?? defaultPreferences : null, canEdit });
   } catch (cause) {
     console.error("studio load failed", cause);
     return error("자료를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.", 500);
@@ -48,7 +53,8 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const user = await getChatGPTUser();
-  if (!user) return error("로그인이 필요합니다.", 401);
+  if (!user) return error("수정하려면 로그인해 주세요.", 401);
+  if (!env.PUBLIC_OWNER_ID || user.userId !== env.PUBLIC_OWNER_ID) return error("수정 권한이 없습니다.", 403);
   let payload: Payload;
   try { payload = await request.json() as Payload; } catch { return error("요청 내용을 읽을 수 없습니다."); }
   const action = clean(payload.action, 40);

@@ -12,7 +12,7 @@ export type Letter = {
   sourceUrls: string; createdAt: string;
 };
 export type Preferences = { styleNotes: string; favoriteNotes: string; avoidedNotes: string };
-export type StudioData = { products: Product[]; posts: Post[]; letters: Letter[]; preferences: Preferences | null };
+export type StudioData = { products: Product[]; posts: Post[]; letters: Letter[]; preferences: Preferences | null; canEdit: boolean };
 
 export async function loadStudio(): Promise<StudioData> {
   const response = await fetch("/api/studio", { cache: "no-store" });

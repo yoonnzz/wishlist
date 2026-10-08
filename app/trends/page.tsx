@@ -85,10 +85,10 @@ export default function TrendsPage() {
   const paragraphs = body.split("\n\n");
   return <StudioShell active="trends">
     <div className="eyebrow">DISCOVER / TREND LETTER</div>
-    <div className="page-head"><div><h1>트렌드 레터</h1><p>달라지는 패션의 흐름을 읽고, 내 위시리스트에 어울리는 것만 골라보세요.</p></div><button className="secondary-button" onClick={() => setCompose((value) => !value)}><Plus size={16}/> 레터 작성</button></div>
+    <div className="page-head"><div><h1>트렌드 레터</h1><p>달라지는 패션의 흐름을 읽고, 내 위시리스트에 어울리는 것만 골라보세요.</p></div>{data?.canEdit && <button className="secondary-button" onClick={() => setCompose((value) => !value)}><Plus size={16}/> 레터 작성</button>}</div>
     {error && <div className="flash error" role="alert">{error}</div>}
     {notice && <div className="flash success" role="status">{notice}</div>}
-    {compose && <form className="panel letter-form" onSubmit={saveLetter}>
+    {data?.canEdit && compose && <form className="panel letter-form" onSubmit={saveLetter}>
       <div className="panel-heading"><div><span className="eyebrow">NEW ISSUE</span><h2>새 트렌드 레터</h2></div><Send size={21}/></div>
       <div className="two-fields"><label className="field-label">제목<input className="text-field" value={form.title} onChange={(event) => setForm({ ...form, title: event.target.value })} required/></label><label className="field-label">짧은 분류<input className="text-field" value={form.kicker} onChange={(event) => setForm({ ...form, kicker: event.target.value })} placeholder="예: 2026 AUTUMN"/></label></div>
       <label className="field-label">한 줄 요약<input className="text-field" value={form.summary} onChange={(event) => setForm({ ...form, summary: event.target.value })} required/></label>

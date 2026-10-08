@@ -103,17 +103,17 @@ export default function PostsPage() {
 
   return <StudioShell active="posts">
     <div className="eyebrow">WRITE / WISHLIST SERIES</div>
-    <div className="page-head"><div><h1>블로그 위시리스트</h1><p>제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요.</p></div><div className="schedule-pill">작성 목표 · 월 · 수 · 금 <strong>08:00</strong></div></div>
+    <div className="page-head"><div><h1>블로그 위시리스트</h1><p>{data?.canEdit ? "제가 고른 상품으로 작성한 글을 여기서 확인하고, 수정하거나 복사해 네이버 블로그에 올려주세요." : "29CM와 무신사에서 고른 위시리스트 글을 읽어보세요."}</p></div><div className="schedule-pill">작성 목표 · 월 · 수 · 금 <strong>08:00</strong></div></div>
     <div className="tab-row" role="tablist" aria-label="블로그 작업">
       <button className={section === "archive" ? "selected" : ""} onClick={() => setSection("archive")}>초안 확인 <span>{data?.posts.length ?? 0}</span></button>
-      <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>취향 알려주기</button>
-      {editingId && <button className={section === "edit" ? "selected" : ""} onClick={() => setSection("edit")}>초안 수정</button>}
+      {data?.canEdit && <button className={section === "products" ? "selected" : ""} onClick={() => setSection("products")}>취향 알려주기</button>}
+      {data?.canEdit && editingId && <button className={section === "edit" ? "selected" : ""} onClick={() => setSection("edit")}>초안 수정</button>}
     </div>
     {error && <div className="flash error" role="alert">{error}</div>}
     {notice && <div className="flash success" role="status">{notice}</div>}
     {!data && !error && <div className="loading-state">작업실 자료를 불러오는 중이에요…</div>}
 
-    {data && section === "edit" && editingId && <div className="edit-draft-wrap">
+    {data?.canEdit && section === "edit" && editingId && <div className="edit-draft-wrap">
       <section className="panel writing-panel">
         <div className="panel-heading"><div><span className="eyebrow">DRAFT EDIT</span><h2>초안 수정하기</h2></div><PenLine size={22}/></div>
         <p className="hint">제목과 본문을 수정할 수 있어요. 상품 구성은 그대로 유지됩니다.</p>
@@ -128,7 +128,7 @@ export default function PostsPage() {
       </section>
     </div>}
 
-    {data && section === "products" && <div className="work-grid">
+    {data?.canEdit && section === "products" && <div className="work-grid">
       <section className="panel"><div className="panel-heading"><div><span className="eyebrow">MY TASTE</span><h2>좋아하는 상품 예시</h2></div><Plus size={22}/></div>
         <p className="hint">취향을 알려주고 싶을 때만 남겨주세요. 매번 상품을 추가할 필요는 없어요.</p>
         <form onSubmit={addProduct} className="stacked-form">
@@ -155,7 +155,7 @@ export default function PostsPage() {
 
     {data && section === "archive" && <section className="panel archive-panel">
       <div className="panel-heading"><div><span className="eyebrow">WISHLIST LIBRARY</span><h2>위시리스트 보관함</h2></div><span className="count-chip">{data.posts.length}편</span></div>
-      {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3><a href={`/posts/${post.id}`}>{post.title}</a></h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><a className="archive-read-link" href={`/posts/${post.id}`}>전체 글 보기 <ArrowUpRight size={15}/></a><button onClick={() => editPost(post)}>수정하기</button>{post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
+        {data.posts.length ? <div className="archive-list">{data.posts.map((post) => <article className="archive-card" key={post.id}><div className="archive-meta"><span>{post.store}</span><span>{post.status === "done" ? "사용 완료" : "검토 전"}</span><time>{post.createdAt.slice(0,10)}</time></div><h3><a href={`/posts/${post.id}`}>{post.title}</a></h3><p>{post.body.slice(0,150)}{post.body.length > 150 ? "…" : ""}</p><div className="archive-actions"><a className="archive-read-link" href={`/posts/${post.id}`}>전체 글 보기 <ArrowUpRight size={15}/></a>{data.canEdit && <button onClick={() => editPost(post)}>수정하기</button>}{data.canEdit && post.status !== "done" && <button onClick={() => markDone(post)} disabled={busy}><Check size={15}/> 사용 완료</button>}</div></article>)}</div> : <div className="empty-inline">아직 저장된 초안이 없어요. 자동 작성 일정은 현재 연결 전입니다. 취향 정보는 ‘취향 알려주기’에 남길 수 있어요.</div>}
     </section>}
   </StudioShell>;
 }
