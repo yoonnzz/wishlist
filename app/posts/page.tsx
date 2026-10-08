@@ -7,7 +7,7 @@ import { loadStudio, studioAction, type Post, type Product, type StudioData, typ
 import { registerWebMcpTool } from "../../lib/register-webmcp";
 import { originalProductUrl } from "../../lib/original-share-links";
 
-const defaultStyle = "도입·상품 감상·맺음말은 한 줄에 문장 하나씩. 아주 짧은 문장 두 개만 자연스러울 때 한 줄에 함께 쓰기. 첫 번째 위시리스트 글처럼 친근한 존댓말과 짧은 구어체로 쓰기. 감탄(!, ?!), 말줄임표(...), ,,ㅎㅎ를 문맥에 맞게 자연스럽게 섞되 같은 표현을 반복하지 않기. 제목을 제외한 글 한 편의 본문 전체에 이모지는 정확히 1개만 넣기. 소재를 언급할 때는 그 상품에서 의미 있는 장점이나 단점 한 가지를 함께 쓰고 확인하지 않은 성능은 단정하지 않기. 막연한 -려고요 대신 문맥에 맞는 -구요 말투로 쓰기. 관심을 가진 이유를 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.";
+const defaultStyle = "도입·상품 감상·맺음말은 한 줄에 문장 하나씩. 아주 짧은 문장 두 개만 자연스러울 때 한 줄에 함께 쓰기. 첫 번째 위시리스트 글처럼 친근한 존댓말과 짧은 구어체로 쓰기. 감탄(!, ?!), 말줄임표(...), ,,ㅎㅎ를 문맥에 맞게 자연스럽게 섞되 같은 표현을 반복하지 않기. 상품 설명 한 개당 약 80%의 확률로 이모지 1개를 자연스럽게 넣기. 상품 5개라면 보통 4개 설명에 각각 1개씩 넣고 제목·도입부 이모지는 별도로 세기. 소재를 언급할 때는 그 상품에서 의미 있는 장점이나 단점 한 가지를 함께 쓰고 확인하지 않은 성능은 단정하지 않기. 막연한 -려고요 대신 문맥에 맞는 -구요 말투로 쓰기. 관심을 가진 이유를 구체적으로 쓰기. 실제 구매·착용 경험은 제공된 사실만 사용하기.";
 
 export default function PostsPage() {
   const [data, setData] = useState<StudioData | null>(null);
